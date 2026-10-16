@@ -1,3 +1,15 @@
+import {
+  getSupabase,
+  getSupabaseConfig,
+  saveSupabaseConfig,
+  getCurrentUser,
+  signInWithEmail,
+  signUpWithEmail,
+  signOutUser,
+  pushStateToCloud,
+  pullStateFromCloud
+} from "./src/supabase.js";
+
 'use strict';
 /* ================= HELPERS ================= */
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -17,9 +29,8 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 let _id=100;const uid=()=>'i'+(++_id);
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 
-/* simulated clock: starts Wed 14 Oct 2026, 14:30:30 */
-const BASE=new Date(2026,9,14,14,30,30).getTime(),T0=Date.now();
-const now=()=>new Date(BASE+(Date.now()-T0));
+/* Real device clock (live local time) */
+const now = () => new Date();
 const todayKey=()=>ymd(now());
 const nowMin=()=>{const n=now();return n.getHours()*60+n.getMinutes()+n.getSeconds()/60};
 
@@ -88,53 +99,51 @@ const REP={none:null,daily:{unit:'day',every:1},weekdays:{unit:'week',every:1,da
 const repKey=r=>{if(!r)return'none';for(const k in REP)if(REP[k]&&JSON.stringify(REP[k])===JSON.stringify({unit:r.unit,every:r.every,...(r.days?{days:r.days}:{})}))return k;return'none'};
 const repLabel=r=>!r?'':({daily:'Every day',weekdays:'Weekdays',weekly:'Every week',monthly:'Every month',yearly:'Every year'}[repKey(r)]||`Every ${r.every} ${r.unit}s`);
 function seedAll(){
+ const t = todayKey();
  S.items=[
-  ev('Team standup','2026-10-05','09:30','09:45',3,{repeat:REP.weekdays,loc:'Huddle room 2'}),
-  ev('Piano lesson','2026-10-04','17:00','18:00',4,{repeat:REP.weekly,loc:'Studio Gamut'}),
-  ev('Yoga flow','2026-10-07','12:00','13:00',2,{repeat:REP.weekly,loc:'Cult, Koramangala'}),
-  ev('1-on-1 with Lead','2026-10-07','14:00','14:45',1,{repeat:REP.weekly,notes:'Bring Q4 hiring plan and the roadmap draft.'}),
-  ev('Dentist visit','2026-10-14','13:00','14:00',2,{loc:"Dr. Rao's clinic",notes:'Bring insurance card. Cleaning plus a quick x-ray.'}),
-  ev('Sprint planning','2026-10-14','16:30','17:30',5,{loc:'Meet, 4th floor'}),
-  ev('Dinner with Meera','2026-10-14','19:30','21:00',4,{loc:'Toit, Indiranagar'}),
-  ev('Design review','2026-10-11','10:00','11:00',5),
-  ev('Team lunch','2026-10-16','13:00','14:00',2,{loc:'Truffles'}),
-  ev('Farmers market','2026-10-17','09:00','10:30',2),
-  ev('Quarterly review','2026-10-20','11:00','12:30',1,{loc:'Boardroom'}),
-  ev('Design review','2026-10-21','15:00','16:00',5),
-  ev('Flight to Delhi','2026-10-28','06:15','09:00',1,{notes:'Terminal 1, gate opens 05:30.'}),
-  ev('Diwali dinner','2026-11-08','20:00','22:30',3,{loc:'Home'}),
-  {id:uid(),type:'birthday',title:"Meera's birthday",date:'2026-10-22',allDay:true,k:4,repeat:REP.yearly},
-  {id:uid(),type:'reminder',title:"Pick up Meera's gift",date:'2026-10-14',start:'18:00',k:4},
-  {id:uid(),type:'reminder',title:'Call insurance about the claim',date:'2026-10-15',start:'10:00',k:3},
-  {id:uid(),type:'reminder',title:'Water the plants',date:'2026-10-04',start:'08:00',k:2,repeat:REP.weekly},
-  tk('Return Amazon package','2026-10-13','low',{done:true}),
-  tk('Pay electric bill','2026-10-14','med'),
-  tk('Review PR #42 & merge feature branch','2026-10-14','high',{subs:[{t:'Read the diff',d:true},{t:'Run the test suite',d:true},{t:'Merge to main',d:false}]}),
-  tk('Submit quarterly budget proposal','2026-10-14','high',{done:true}),
-  tk('Order new mechanical keyboard switches','2026-10-15','low'),
-  tk('Reply to landlord about renewal','2026-10-15','med'),
-  tk('Renew domain registration','2026-10-16','med'),
-  tk('Call mom','2026-10-18','med'),
-  tk('Plan Q4 roadmap','2026-10-20','high',{subs:[{t:'Collect team input',d:false},{t:'Draft themes',d:false},{t:'Review with Lead',d:false}]}),
-  tk('Book Goa flights',null,'med'),
-  tk('Back up phone photos',null,'low'),
-  tk('Read chapter 7 of the DDIA book',null,'low')
+  ev("Team standup", addKey(t, -2), "09:30", "09:45", 3, {repeat:REP.weekdays, loc:"Huddle room 2"}),
+  ev("Piano lesson", addKey(t, -3), "17:00", "18:00", 4, {repeat:REP.weekly, loc:"Studio Gamut"}),
+  ev("Yoga flow", addKey(t, 2), "12:00", "13:00", 2, {repeat:REP.weekly, loc:"Cult, Koramangala"}),
+  ev("1-on-1 with Lead", addKey(t, 1), "14:00", "14:45", 1, {repeat:REP.weekly, notes:"Bring Q4 hiring plan and roadmap draft."}),
+  ev("Dentist checkup", t, "13:00", "14:00", 2, {loc:"Dr. Rao's clinic", notes:"Cleaning plus a quick x-ray."}),
+  ev("Sprint planning", t, "16:30", "17:30", 5, {loc:"Meet, 4th floor"}),
+  ev("Dinner with Meera", t, "19:30", "21:00", 4, {loc:"Toit, Indiranagar"}),
+  ev("Team lunch", addKey(t, 2), "13:00", "14:00", 2, {loc:"Truffles"}),
+  ev("Farmers market", addKey(t, 3), "09:00", "10:30", 2),
+  ev("Quarterly review", addKey(t, 6), "11:00", "12:30", 1, {loc:"Boardroom"}),
+  ev("Flight to Delhi", addKey(t, 14), "06:15", "09:00", 1, {notes:"Terminal 1, gate opens 05:30."}),
+  {id:uid(), type:"birthday", title:"Meera's birthday", date:addKey(t, 8), allDay:true, k:4, repeat:REP.yearly},
+  {id:uid(), type:"reminder", title:"Pick up Meera's gift", date:t, start:"18:00", k:4},
+  {id:uid(), type:"reminder", title:"Call insurance about the claim", date:addKey(t, 1), start:"10:00", k:3},
+  {id:uid(), type:"reminder", title:"Water the plants", date:addKey(t, -2), start:"08:00", k:2, repeat:REP.weekly},
+  tk("Return Amazon package", addKey(t, -1), "low", {done:true}),
+  tk("Pay electric bill", t, "med"),
+  tk("Review PR #42 & merge feature branch", t, "high", {subs:[{t:"Read the diff",d:true},{t:"Run the test suite",d:true},{t:"Merge to main",d:false}]}),
+  tk("Submit quarterly budget proposal", t, "high", {done:true}),
+  tk("Order new mechanical keyboard switches", addKey(t, 1), "low"),
+  tk("Reply to landlord about renewal", addKey(t, 1), "med"),
+  tk("Renew domain registration", addKey(t, 2), "med"),
+  tk("Call mom", addKey(t, 4), "med"),
+  tk("Plan Q4 roadmap", addKey(t, 6), "high", {subs:[{t:"Collect team input",d:false},{t:"Draft themes",d:false},{t:"Review with Lead",d:false}]}),
+  tk("Book Goa flights", null, "med"),
+  tk("Back up phone photos", null, "low"),
+  tk("Read chapter 7 of the DDIA book", null, "low")
  ];
  const mkOcc=(last,gaps,cost,notes)=>{let d=last;const o=[{d,cost,note:notes[0]}];gaps.forEach((g,i)=>{d=addKey(d,-g);o.push({d,cost,note:notes[(i+1)%notes.length]})});return o};
  S.logs=[
-  {id:uid(),name:'Haircut',icon:'scissors',target:28,k:4,occ:mkOcc('2026-09-17',[27,28,27,28,27,28,28],35,['Salon cut & trim'])},
-  {id:uid(),name:'Car wash',icon:'car',target:14,k:1,occ:mkOcc('2026-10-01',[12,14,13,15,12,13],12,['Full exterior wash','Wash + vacuum'])},
-  {id:uid(),name:'Gym workout',icon:'dumbbell',target:2,k:5,occ:mkOcc('2026-10-12',[2,3,2,1,2,3,2,2,3,2,2,1,2,3,2,2],0,['Push day','Pull day','Legs','Cardio'])},
-  {id:uid(),name:'Water filter',icon:'drop',target:60,k:2,occ:mkOcc('2026-08-17',[60,57,59],18,['Replaced cartridge'])},
-  {id:uid(),name:'Petrol',icon:'fuel',target:9,k:3,occ:mkOcc('2026-10-06',[8,9,7,10,8,9],42,['Full tank'])},
-  {id:uid(),name:'Water plants',icon:'leaf',target:3,k:2,occ:mkOcc('2026-10-11',[3,4,3,3,4,3,3,3],0,['All plants'])}
+  {id:uid(), name:"Haircut", icon:"scissors", target:28, k:4, occ:mkOcc(addKey(t, -27), [27,28,27,28,27], 35, ["Salon cut & trim"])},
+  {id:uid(), name:"Car wash", icon:"car", target:14, k:1, occ:mkOcc(addKey(t, -13), [12,14,13,15], 12, ["Full exterior wash","Wash + vacuum"])},
+  {id:uid(), name:"Gym workout", icon:"dumbbell", target:2, k:5, occ:mkOcc(addKey(t, -2), [2,3,2,1,2,3,2], 0, ["Push day","Pull day","Legs","Cardio"])},
+  {id:uid(), name:"Water filter", icon:"drop", target:60, k:2, occ:mkOcc(addKey(t, -58), [60,57,59], 18, ["Replaced cartridge"])},
+  {id:uid(), name:"Petrol", icon:"fuel", target:9, k:3, occ:mkOcc(addKey(t, -8), [8,9,7,10], 42, ["Full tank"])},
+  {id:uid(), name:"Water plants", icon:"leaf", target:3, k:2, occ:mkOcc(addKey(t, -3), [3,4,3,3], 0, ["All plants"])}
  ];
  S.cds=[
-  {id:uid(),title:'Product launch',date:'2026-11-03',emoji:'🚀',created:'2026-09-15'},
-  {id:uid(),title:'Diwali',date:'2026-11-08',emoji:'🪔',created:'2026-09-01'},
-  {id:uid(),title:"Mom's birthday",date:'2026-12-02',emoji:'🎂',created:'2026-10-01'},
-  {id:uid(),title:'Goa trip',date:'2026-12-19',emoji:'🏖️',created:'2026-08-20'},
-  {id:uid(),title:'New Year',date:'2027-01-01',emoji:'🎆',created:'2026-10-01'}
+  {id:uid(), title:"Product launch", date:addKey(t, 18), emoji:"🚀", created:addKey(t, -30)},
+  {id:uid(), title:"Diwali", date:addKey(t, 25), emoji:"🪔", created:addKey(t, -45)},
+  {id:uid(), title:"Mom's birthday", date:addKey(t, 48), emoji:"🎂", created:addKey(t, -14)},
+  {id:uid(), title:"Goa trip", date:addKey(t, 65), emoji:"🏖️", created:addKey(t, -60)},
+  {id:uid(), title:"New Year", date: String(pd(t).getFullYear() + 1) + "-01-01", emoji:"🎆", created:addKey(t, -15)}
  ];
 }
 
@@ -388,7 +397,7 @@ function openPage(render){
 }
 function closePage(){const p=UI.page;if(!p)return;UI.page=null;S.logId=null;p.el.classList.remove('open');setTimeout(()=>p.el.remove(),560)}
 function rollIn(id){if(!id||reduced())return;$$('[data-num="'+id+'"]').forEach(el=>el.animate([{transform:'translateY(55%)',opacity:0},{transform:'none',opacity:1}],{duration:650,easing:'cubic-bezier(.34,1.5,.5,1)'}))}
-function refreshAll(){const id=S.rollId;S.rollId=null;render();if(UI.page)paintPage();if(UI.sheet)paintSheet();rollIn(id)}
+function refreshAll(){const id=S.rollId;S.rollId=null;saveState();render();if(UI.page)paintPage();if(UI.sheet)paintSheet();rollIn(id)}
 let toastT,toastUndo=null;
 function toast(msg,undo){$('#toastmsg').textContent=msg;toastUndo=undo||null;$('#toastact').style.display=undo?'':'none';const t=$('#toast');t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),4200)}
 
@@ -581,6 +590,32 @@ function createFromParse(p){
  return{msg:`${TYPELABEL[T]} added${p.date?' · '+dayLabel(p.date,true):''}`,undo:()=>{S.items=S.items.filter(x=>x!==e)}};
 }
 
+
+/* ================= SUPABASE AUTH & CLOUD SHEETS ================= */
+function authSheetHtml() {
+  const sb = getSupabase();
+  const cfg = getSupabaseConfig();
+  if (!sb) {
+    return "<div class=\"shead\"><div><h2 class=\"disp\">Connect Supabase</h2><small>Enter your Supabase project keys to enable cloud sync</small></div></div>" +
+      fld("Supabase Project URL", "<input class=\"inp\" id=\"sb-url\" placeholder=\"https://xyzcompany.supabase.co\" value=\"" + esc(cfg.url) + "\">") +
+      fld("Supabase Anon Key", "<input class=\"inp\" id=\"sb-key\" placeholder=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\" value=\"" + esc(cfg.anonKey) + "\">") +
+      "<div class=\"sgroup\" style=\"margin-top:12px\"><button class=\"btn press\" data-act=\"savesbcfg\">" + ic("check",20) + "Save and Connect</button></div>" +
+      "<div style=\"font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5\">Tip: You can also specify <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> in a <code>.env</code> file.</div>";
+  }
+
+  if (S.user) {
+    return "<div class=\"shead\"><div><h2 class=\"disp\">Account</h2><small>Signed in as " + esc(S.user.email) + "</small></div></div>" +
+      "<section class=\"card dl\" style=\"margin-bottom:14px\"><div class=\"mrow\"><span>User Email</span><b class=\"num\">" + esc(S.user.email) + "</b></div><div class=\"mrow\"><span>Status</span><span style=\"color:var(--accent);font-weight:700\">Connected</span></div></section>" +
+      "<div class=\"sgroup\"><button class=\"btn press\" data-act=\"syncnow\">" + ic("spark",18) + "Sync Now</button><button class=\"btn dng press\" data-act=\"signout\">" + ic("x",18) + "Sign Out</button></div>";
+  }
+
+  return "<div class=\"shead\"><div><h2 class=\"disp\">Cloud Sync</h2><small>Sign in to sync your data across devices</small></div></div>" +
+    fld("Email", "<input class=\"inp\" type=\"email\" id=\"auth-email\" placeholder=\"you@domain.com\" autocomplete=\"email\">") +
+    fld("Password", "<input class=\"inp\" type=\"password\" id=\"auth-pass\" placeholder=\"••••••••\" autocomplete=\"current-password\">") +
+    "<div class=\"sgroup\" style=\"margin-top:12px\"><button class=\"btn press\" data-act=\"signin\">" + ic("check",20) + "Sign In</button><button class=\"btn sec press\" data-act=\"signup\">Create Account</button></div>" +
+    "<div class=\"sgroup\" style=\"margin-top:12px\"><button class=\"btn sec sm press\" data-act=\"editsbcfg\">" + ic("settings",16) + "Change Project Keys</button></div>";
+}
+
 /* ================= COMMAND BAR ================= */
 const CMD={acts:[],sel:0,key:'',prev:new Set(),math:null};
 const EXAMPLES=['dentist next tue 4pm','pay rent fri !high','standup every weekday 9:30','remind me in 20m to stretch','days until dec 25','9am ist in new york','log haircut'];
@@ -652,7 +687,8 @@ function settingsHtml(){
  h+=`<div class="ssec">Look and feel</div><section class="card" style="padding:14px 0 4px"><div class="tcards" style="margin:0;padding:2px 16px 10px">${THEMES.map(([id,n])=>`<button class="tcard ${P.theme===id?'sel':''}" data-theme="${id}" data-act="theme" data-t="${id}"><div class="mh"></div><div class="ml"></div><div class="ml s"></div><div class="mn disp">14</div><div class="nm">${n}</div></button>`).join('')}</div><div class="srow"><div><b>Reduce motion</b><small>Simpler transitions, no bounce</small></div>${tog(P.reduce,'tgreduce')}</div><div class="srow col"><div><b>Haptics</b><small>Vibration feedback on taps and check-offs</small></div><div style="margin-top:10px">${segHtml('haptics',[['off','Off'],['subtle','Subtle'],['full','Full']],P.haptics,'sm')}</div></div><div class="srow col"><div><b>Density</b><small>How tightly lists are packed</small></div><div style="margin-top:10px">${segHtml('density',[['comfortable','Comfortable'],['compact','Compact']],P.density,'sm')}</div></div></section>`;
  h+=`<div class="ssec">Calendar</div><section class="card"><div class="srow col"><div><b>Week starts on</b></div><div style="margin-top:10px">${segHtml('week',[[1,'Monday'],[0,'Sunday'],[6,'Saturday']].map(([v,l])=>[String(v),l]),String(P.week),'sm')}</div></div><div class="srow col"><div><b>Time format</b></div><div style="margin-top:10px">${segHtml('hour',[['12h','12-hour'],['24h','24-hour']],P.hour,'sm')}</div></div></section>`;
  h+=`<div class="ssec">Reminders and alarms</div><section class="card"><div class="srow col"><div><b>Default reminder style</b><small>Loud alarm rings until you dismiss it</small></div><div style="margin-top:10px">${segHtml('alarm',[['standard','Standard'],['loud','Loud alarm']],P.alarm,'sm')}</div></div><div class="srow col"><div><b>Snooze duration</b></div><div style="margin-top:10px">${segHtml('snooze',[['5','5 min'],['10','10 min'],['15','15 min'],['30','30 min']],String(P.snooze),'sm')}</div></div><button class="srow press" style="width:100%" data-act="notifhealth"><div><b>Notification health</b><small>Check exact alarms, battery and permissions</small></div>${ic('chevR',18)}</button></section>`;
- h+=`<div class="ssec">Your data</div><section class="card"><div class="srow"><div><b>Backup</b><small>One file with everything</small></div><span style="display:flex;gap:8px"><button class="addbtn press" data-act="fake" data-m="Backup exported">Export</button><button class="addbtn press" data-act="fake" data-m="Pick a backup file to import">Import</button></span></div><div class="srow"><div><b>Calendar file (.ics)</b><small>Works with any calendar app</small></div><span style="display:flex;gap:8px"><button class="addbtn press" data-act="fake" data-m="Calendar exported as .ics">Export</button><button class="addbtn press" data-act="fake" data-m="Pick an .ics file to import">Import</button></span></div><div class="srow"><div><b>Demo data</b><small>Reset to the sample schedule</small></div><button class="addbtn press" data-act="demo">Load</button></div><div class="srow"><div><b style="color:var(--hi)">Clear all data</b><small>Removes events, tasks, logs and countdowns</small></div><button class="addbtn press" style="color:var(--hi)" data-act="clear">Clear</button></div></section>`;
+ h+=`<div class="ssec">Cloud Sync (Supabase)</div><section class="card"><div class="srow"><div><b>${S.user ? "Synced with Supabase" : "Offline / Local Only"}</b><small>${S.user ? esc(S.user.email) : "Connect Supabase to sync across devices"}</small></div><button class="addbtn press" data-act="openauth">${S.user ? "Account" : "Connect"}</button></div>${S.user ? '<div class="srow"><div><b>Cloud Sync</b><small>Push local changes to cloud</small></div><button class="addbtn press" data-act="syncnow">Sync now</button></div>' : ""}</section>
+<div class="ssec">Your data</div><section class="card"><div class="srow"><div><b>Backup (.json)</b><small>Export or restore all data</small></div><span style="display:flex;gap:8px"><button class="addbtn press" data-act="exportjson">Export</button><button class="addbtn press" data-act="importjson">Import</button></span></div><div class="srow"><div><b>Calendar file (.ics)</b><small>Works with Apple/Google calendar</small></div><span style="display:flex;gap:8px"><button class="addbtn press" data-act="exportics">Export</button><button class="addbtn press" data-act="importics">Import</button></span></div><div class="srow"><div><b>Demo data</b><small>Reset to fresh sample schedule</small></div><button class="addbtn press" data-act="demo">Load</button></div><div class="srow"><div><b style="color:var(--hi)">Clear all data</b><small>Removes events, tasks, logs and countdowns</small></div><button class="addbtn press" style="color:var(--hi)" data-act="clear">Clear</button></div></section>`;
  h+=`<div class="about"><b class="disp">Calyx</b>Version 1.0 design mock<br>Made without a server. Zero telemetry.<br><button class="addbtn press" style="margin-top:12px" data-act="welcome">Replay welcome</button></div></div>`;
  return h;
 }
@@ -753,7 +789,79 @@ const ACT={
  },
  tgreduce(){S.prefs.reduce=!S.prefs.reduce;applyPrefs();savePrefs();paintPage()},
  notifhealth(){toast('All good: notifications, exact alarms and battery settings are fine')},
- fake(el){toast(el.dataset.m)},
+ openauth(){openSheet(authSheetHtml)},
+  editsbcfg(){openSheet(authSheetHtml)},
+  async savesbcfg(){
+    const url = ($("#sb-url") ? $("#sb-url").value : "").trim();
+    const key = ($("#sb-key") ? $("#sb-key").value : "").trim();
+    if (!url || !key) {
+      toast("Please enter both Supabase URL and Anon key");
+      return;
+    }
+    saveSupabaseConfig(url, key);
+    closeSheet();
+    toast("Supabase connected!");
+    paintPage();
+  },
+  async signin(){
+    const email = ($("#auth-email") ? $("#auth-email").value : "").trim();
+    const password = ($("#auth-pass") ? $("#auth-pass").value : "").trim();
+    if (!email || !password) return toast("Please enter email and password");
+    try {
+      const { user } = await signInWithEmail(email, password);
+      S.user = user;
+      closeSheet();
+      toast("Signed in as " + user.email);
+      const cloudData = await pullStateFromCloud();
+      if (cloudData) {
+        if (cloudData.items) S.items = cloudData.items;
+        if (cloudData.logs) S.logs = cloudData.logs;
+        if (cloudData.cds) S.cds = cloudData.cds;
+        if (cloudData.pages) S.pages = cloudData.pages;
+        if (cloudData.folders) S.folders = cloudData.folders;
+        saveState();
+        refreshAll();
+      }
+      paintPage();
+    } catch(err) {
+      toast(err.message || "Failed to sign in");
+    }
+  },
+  async signup(){
+    const email = ($("#auth-email") ? $("#auth-email").value : "").trim();
+    const password = ($("#auth-pass") ? $("#auth-pass").value : "").trim();
+    if (!email || !password) return toast("Please enter email and password");
+    try {
+      const { user } = await signUpWithEmail(email, password);
+      S.user = user;
+      closeSheet();
+      toast("Account created!");
+      pushStateToCloud(S).catch(()=>{});
+      paintPage();
+    } catch(err) {
+      toast(err.message || "Failed to sign up");
+    }
+  },
+  async signout(){
+    await signOutUser();
+    S.user = null;
+    closeSheet();
+    toast("Signed out");
+    paintPage();
+  },
+  async syncnow(){
+    toast("Syncing with Supabase...");
+    const res = await pushStateToCloud(S);
+    if (res.synced) {
+      toast("Synced to cloud successfully!");
+    } else {
+      toast("Sync failed: " + (res.error || res.reason));
+    }
+  },
+  exportjson(){exportJsonBackup()},
+  importjson(){triggerImportJson()},
+  exportics(){exportIcsCalendar()},
+  importics(){triggerImportIcs()},
  demo(){seedAll();toast('Demo schedule loaded');refreshAll()},
  clear(){const a=[S.items,S.logs,S.cds];S.items=[];S.logs=[];S.cds=[];toast('Everything cleared',()=>{S.items=a[0];S.logs=a[1];S.cds=a[2]});refreshAll()},
  welcome(){closePage();showWelcome()},
