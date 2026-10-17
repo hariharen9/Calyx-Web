@@ -6,7 +6,11 @@ const STORAGE_KEY_ANON = 'calyx.supabase.anon';
 
 export function getSupabaseConfig() {
   const url = localStorage.getItem(STORAGE_KEY_URL) || import.meta.env.VITE_SUPABASE_URL || '';
-  const anonKey = localStorage.getItem(STORAGE_KEY_ANON) || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const anonKey =
+    localStorage.getItem(STORAGE_KEY_ANON) ||
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    '';
   return { url, anonKey };
 }
 

@@ -1,37 +1,271 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="calm">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2E6F68">
-<title>Calyx — every date and time, in one place</title>
-<link rel="icon" type="image/svg+xml" href="/icon.svg">
-<link rel="manifest" href="/manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&family=Figtree:wght@400;500;600;700&family=Anton&family=Archivo:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;600;700;800&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-<div class="stage">
- <div class="phone">
-  <div class="app" id="app">
-   <div class="status"><span id="sbt">14:30</span><span class="isl"></span><span class="sic">
-     <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
-     <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="currentColor" opacity=".5"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".5"/></svg></span></div>
-   <div class="main" id="main">
-     <div id="view" role="main"></div>
-     <div class="qa" id="qa"><input id="qain" placeholder="Add a task, like “renew passport fri !high”" autocomplete="off" enterkeyhint="done"><button data-act="qaadd" aria-label="Add task"></button></div>
-     <nav class="dock" id="dock">
-       <div class="tabs" id="tabs" style="--idx:0"><span class="tp"></span></div>
-       <button class="fab press" data-act="cmd" aria-label="Open command bar" id="fab"></button>
-     </nav>
-     <div class="toast" id="toast"><span id="toastmsg"></span><button id="toastact" data-act="toastact">Undo</button></div>
-     <div id="overlays"></div>
-   </div>
-  </div>
- </div>
-</div>
-<script type="module" src="/app.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#2E6F68" />
+    <title>Calyx — every date and time, in one place</title>
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&family=Figtree:wght@400;500;600;700&family=Anton&family=Archivo:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;600;700;800&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell" id="shell">
+      <!-- Desktop Navigation Sidebar (Desktop only) -->
+      <aside class="desk-sidebar" id="deskSidebar">
+        <div class="desk-brand">
+          <div class="desk-logo">
+            <svg
+              class="ic"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                d="M6 3h12M6 21h12M7 3c0 5.5 5 6.5 5 9s-5 3.5-5 9M17 3c0 5.5-5 6.5-5 9s5 3.5 5 9"
+              />
+            </svg>
+          </div>
+          <div class="desk-brand-text">
+            <span class="desk-title disp">Calyx</span>
+            <span class="desk-ver">v1.0</span>
+          </div>
+        </div>
+
+        <button
+          class="desk-search press"
+          data-act="cmd"
+          aria-label="Open command bar"
+        >
+          <svg
+            class="ic"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-4-4" />
+          </svg>
+          <span>Find or add anything</span>
+          <kbd>⌘K</kbd>
+        </button>
+
+        <button
+          class="desk-new-btn press"
+          data-act="compose"
+          aria-label="Create new item"
+        >
+          <svg
+            class="ic"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          <span>New Entry</span>
+        </button>
+
+        <nav class="desk-nav">
+          <div class="desk-nav-group">
+            <div class="desk-nav-heading">VIEWS</div>
+            <button
+              class="desk-nav-item press on"
+              data-act="tab"
+              data-tab="home"
+              id="dtab-home"
+            >
+              <svg
+                class="ic"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M3.5 11 12 3.5 20.5 11" />
+                <path d="M5.5 9.5V20h13V9.5" />
+                <path d="M10 20v-5.5h4V20" />
+              </svg>
+              <span>Home</span>
+            </button>
+            <button
+              class="desk-nav-item press"
+              data-act="tab"
+              data-tab="cal"
+              id="dtab-cal"
+            >
+              <svg
+                class="ic"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <rect x="3" y="5" width="18" height="16" rx="3" />
+                <path d="M3 10h18M8 3v4M16 3v4" />
+              </svg>
+              <span>Calendar</span>
+            </button>
+            <button
+              class="desk-nav-item press"
+              data-act="tab"
+              data-tab="tasks"
+              id="dtab-tasks"
+            >
+              <svg
+                class="ic"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <path d="m8 12.2 2.8 2.8L16 9.5" />
+              </svg>
+              <span>Tasks</span>
+              <span class="desk-badge" id="deskTaskBadge">0</span>
+            </button>
+            <button
+              class="desk-nav-item press"
+              data-act="tab"
+              data-tab="pages"
+              id="dtab-pages"
+            >
+              <svg
+                class="ic"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M5 4h14v12l-5 5H5z" />
+                <path d="M14 21v-5h5M8.5 9h7M8.5 13h4" />
+              </svg>
+              <span>Pages</span>
+              <span class="desk-badge" id="deskPagesBadge">0</span>
+            </button>
+            <button
+              class="desk-nav-item press"
+              data-act="tab"
+              data-tab="track"
+              id="dtab-track"
+            >
+              <svg
+                class="ic"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M3 17.5 8.5 11l4 3.2L20 6" />
+                <path d="M14.5 6H20v5.5" />
+              </svg>
+              <span>Track</span>
+              <span class="desk-badge" id="deskTrackBadge">0</span>
+            </button>
+          </div>
+
+          <div class="desk-nav-group">
+            <div class="desk-nav-heading">FOLDERS</div>
+            <div id="deskFoldersList" class="desk-folders-list"></div>
+          </div>
+        </nav>
+
+        <div class="desk-sidebar-footer">
+          <button
+            class="desk-sync-pill press"
+            data-act="openauth"
+            id="deskSyncBtn"
+          >
+            <span class="sync-dot" id="deskSyncDot"></span>
+            <span id="deskSyncLabel">Local Offline</span>
+          </button>
+          <button
+            class="desk-footer-btn press"
+            data-act="settings"
+            aria-label="Settings"
+          >
+            <svg
+              class="ic"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+              <circle cx="15" cy="7" r="2.2" />
+              <circle cx="9" cy="17" r="2.2" />
+            </svg>
+            <span>Settings</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main App Container -->
+      <div class="stage" id="stage">
+        <div class="phone" id="phone">
+          <div class="app" id="app">
+            <!-- Desktop Topbar (Desktop only) -->
+            <header class="desk-topbar" id="deskTopbar">
+              <div class="desk-topbar-left">
+                <h1 class="disp desk-view-title" id="deskViewTitle">Today</h1>
+                <span class="desk-view-sub" id="deskViewSub"></span>
+              </div>
+              <div class="desk-topbar-right" id="deskTopbarActions"></div>
+            </header>
+
+            <div class="main" id="main">
+              <div id="view" role="main"></div>
+              <div class="qa" id="qa">
+                <input
+                  id="qain"
+                  placeholder="Add a task, like “renew passport fri !high”"
+                  autocomplete="off"
+                  enterkeyhint="done"
+                /><button data-act="qaadd" aria-label="Add task"></button>
+              </div>
+              <nav class="dock" id="dock">
+                <div class="tabs" id="tabs" style="--idx: 0">
+                  <span class="tp"></span>
+                </div>
+                <button
+                  class="fab press"
+                  data-act="cmd"
+                  aria-label="Open command bar"
+                  id="fab"
+                ></button>
+              </nav>
+              <div class="toast" id="toast">
+                <span id="toastmsg"></span
+                ><button id="toastact" data-act="toastact">Undo</button>
+              </div>
+              <div id="overlays"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/app.js"></script>
+  </body>
 </html>
