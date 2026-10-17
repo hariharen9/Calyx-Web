@@ -80,6 +80,11 @@ export async function signOutUser() {
 }
 
 // Database Cloud Sync Helpers
+let lastLocalPushTime = 0;
+export function getLastLocalPushTime() {
+  return lastLocalPushTime;
+}
+
 export async function pushStateToCloud(state) {
   const sb = getSupabase();
   if (!sb) return { synced: false, reason: 'unconfigured' };
@@ -87,9 +92,11 @@ export async function pushStateToCloud(state) {
   if (!user) return { synced: false, reason: 'unauthenticated' };
 
   try {
+    const nowIso = new Date().toISOString();
+    lastLocalPushTime = Date.now();
     const payload = {
       user_id: user.id,
-      updated_at: new Date().toISOString(),
+      updated_at: nowIso,
       items: state.items,
       logs: state.logs,
       cds: state.cds,
@@ -103,7 +110,7 @@ export async function pushStateToCloud(state) {
       .upsert(payload, { onConflict: 'user_id' });
 
     if (error) throw error;
-    return { synced: true };
+    return { synced: true, timestamp: nowIso };
   } catch (err) {
     console.error('Error pushing state to Supabase:', err);
     return { synced: false, error: err.message };
@@ -129,4 +136,59 @@ export async function pullStateFromCloud() {
     console.error('Error pulling state from Supabase:', err);
     return null;
   }
+}
+
+let activeRealtimeChannel = null;
+
+export function subscribeToStateChanges(onUpdate) {
+  const sb = getSupabase();
+  if (!sb) return () => {};
+
+  if (activeRealtimeChannel) {
+    try {
+      sb.removeChannel(activeRealtimeChannel);
+    } catch (e) {}
+    activeRealtimeChannel = null;
+  }
+
+  getCurrentUser().then((user) => {
+    if (!user || !sb) return;
+
+    try {
+      activeRealtimeChannel = sb
+        .channel(`user-sync-${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'user_data',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            // Ignore echoes of our own pushes within 2.5 seconds
+            if (Date.now() - lastLocalPushTime < 2500) return;
+            if (payload && payload.new && onUpdate) {
+              onUpdate(payload.new);
+            }
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Realtime sync connected to Calyx cloud');
+          }
+        });
+    } catch (err) {
+      console.warn('Realtime subscription not supported or failed:', err);
+    }
+  });
+
+  return () => {
+    if (activeRealtimeChannel && sb) {
+      try {
+        sb.removeChannel(activeRealtimeChannel);
+      } catch (e) {}
+      activeRealtimeChannel = null;
+    }
+  };
 }

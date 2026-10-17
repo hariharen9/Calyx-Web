@@ -8,6 +8,7 @@ import {
   signOutUser,
   pushStateToCloud,
   pullStateFromCloud,
+  subscribeToStateChanges,
 } from "./src/supabase.js";
 
 ("use strict");
@@ -78,6 +79,139 @@ const nowMin = () => {
   const n = now();
   return n.getHours() * 60 + n.getMinutes() + n.getSeconds() / 60;
 };
+
+/* ================= AUDIO & NOTIFICATIONS ================= */
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) _audioCtx = new AC();
+  }
+  if (_audioCtx && _audioCtx.state === "suspended") {
+    _audioCtx.resume().catch(() => {});
+  }
+  return _audioCtx;
+}
+
+function playChime(loud = false) {
+  try {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const t0 = ctx.currentTime;
+    if (loud) {
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, t0 + idx * 0.12);
+        gain.gain.setValueAtTime(0.25, t0 + idx * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, t0 + idx * 0.12 + 0.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t0 + idx * 0.12);
+        osc.stop(t0 + idx * 0.12 + 0.5);
+      });
+    } else {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, t0);
+      osc.frequency.exponentialRampToValueAtTime(880, t0 + 0.08);
+      gain.gain.setValueAtTime(0.2, t0);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.55);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.55);
+    }
+  } catch (err) {
+    console.warn("Audio playback error:", err);
+  }
+}
+
+async function requestNotificationPermission() {
+  if (!("Notification" in window)) return "unsupported";
+  if (Notification.permission === "granted") return "granted";
+  try {
+    const res = await Notification.requestPermission();
+    return res;
+  } catch (e) {
+    return Notification.permission;
+  }
+}
+
+function sendNotification(title, body, tag) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    try {
+      new Notification(title, {
+        body,
+        icon: "/icon.svg",
+        tag: tag || "calyx-alert",
+        renotify: true,
+      });
+    } catch (e) {
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready
+          .then((reg) => {
+            reg.showNotification(title, {
+              body,
+              icon: "/icon.svg",
+              tag: tag || "calyx-alert",
+            });
+          })
+          .catch(() => {});
+      }
+    }
+  }
+}
+
+const firedAlarms = new Set();
+
+function triggerAlarm(it) {
+  playChime(S.prefs.alarm === "loud");
+  buzz([40, 100, 40, 100, 60]);
+  const timeStr = it.start ? fmtT(it.start) : "";
+  const subTitle = `${TYPELABEL[it.type] || "Reminder"}${timeStr ? " · " + timeStr : ""}`;
+  sendNotification(it.title, subTitle, `calyx-${it.id}`);
+
+  const snoozeMins = S.prefs.snooze || 10;
+  toast(`🔔 ${it.title} (${timeStr})`, () => {
+    snoozeItem(it.id, snoozeMins);
+  });
+  const toastAct = $("#toastact");
+  if (toastAct) toastAct.textContent = `Snooze ${snoozeMins}m`;
+}
+
+function snoozeItem(id, mins = 10) {
+  const it = S.items.find((x) => x.id === id);
+  if (!it) return;
+  const newMin = nowMin() + mins;
+  it.start = HM(Math.round(newMin));
+  it.date = todayKey();
+  saveState();
+  refreshAll();
+  toast(`Snoozed for ${mins} minutes`);
+}
+
+function checkAlarms() {
+  const t = todayKey();
+  const curHM = HM(nowMin());
+  if (!S.items || !S.items.length) return;
+  S.items.forEach((it) => {
+    if (
+      (it.type === "reminder" || it.type === "event") &&
+      it.date === t &&
+      it.start &&
+      it.start === curHM
+    ) {
+      const alarmKey = `${it.id}-${t}-${curHM}`;
+      if (!firedAlarms.has(alarmKey)) {
+        firedAlarms.add(alarmKey);
+        triggerAlarm(it);
+      }
+    }
+  });
+}
 
 /* ================= ICONS ================= */
 const ICONS = {
@@ -191,6 +325,31 @@ const buzz = (n) => {
 
 /* ================= PERSISTENCE & DESKTOP SYNC ================= */
 const DATA_KEY = "calyx.data.v1";
+let syncTimer = null;
+
+function scheduleCloudSync(delay = 1200) {
+  if (!S.user) return;
+  clearTimeout(syncTimer);
+  const dot = $("#deskSyncDot");
+  if (dot) dot.classList.add("syncing");
+  syncTimer = setTimeout(async () => {
+    try {
+      await pushStateToCloud(S);
+    } catch (e) {
+      console.warn("Auto-sync error:", e);
+    } finally {
+      const d = $("#deskSyncDot");
+      if (d) d.classList.remove("syncing");
+    }
+  }, delay);
+}
+
+window.addEventListener("beforeunload", () => {
+  if (syncTimer) {
+    clearTimeout(syncTimer);
+    pushStateToCloud(S).catch(() => {});
+  }
+});
 
 function saveState() {
   try {
@@ -203,9 +362,7 @@ function saveState() {
       prefs: S.prefs,
     };
     localStorage.setItem(DATA_KEY, JSON.stringify(data));
-    if (S.user) {
-      pushStateToCloud(S).catch(() => {});
-    }
+    scheduleCloudSync();
     updateDeskBadges();
   } catch (e) {
     console.error("saveState error:", e);
@@ -467,7 +624,7 @@ function updateDeskBadges() {
     fl.innerHTML = S.folders
       .map((f) => {
         const cnt = S.pages.filter((p) => p.folder === f.id).length;
-        return `<button class="desk-folder-item press" data-act="tab" data-tab="pages">
+        return `<button class="desk-folder-item press" data-act="deskfolder" data-id="${f.id}">
         <span class="fe">${f.emoji}</span>
         <span>${esc(f.name)}</span>
         <small>${cnt}</small>
@@ -1349,26 +1506,51 @@ function vTasks() {
       ? `<section class="card list">${g.done.map((t) => taskRow(t, true)).join("")}</section>`
       : `<section class="card">${emptyBox("check", "Completed tasks will land here.")}</section>`;
   }
-  return `<div class="desk-tasks-split">
-  <div class="desk-tasks-nav card ${stg(0)}">
-    <div class="thead"><div class="big disp" data-count="${g.open.length}">${g.open.length}</div><p>open tasks<small>${g.today.length} due today or overdue</small></p></div>
-    <div style="margin:12px 0">${segHtml(
-      "taskTab",
-      [
-        ["today", "Today", g.today.length],
-        ["upcoming", "Upcoming", g.upcoming.length],
-        ["anytime", "Anytime", g.anytime.length],
-        ["done", "Done", g.done.length],
-      ],
-      S.taskTab,
-    )}</div>
-    <div class="desk-tasks-quick">
-      <input id="qain-desk" class="inp" placeholder="Quick add task..." autocomplete="off">
-      <button class="pillbtn press" data-act="qaadd-desk">${ic("plus", 16)}Add</button>
+  const tabsData = [
+    ["today", "Today", g.today.length],
+    ["upcoming", "Upcoming", g.upcoming.length],
+    ["anytime", "Anytime", g.anytime.length],
+    ["done", "Done", g.done.length],
+  ];
+
+  return `<div class="tasks-page">
+    <div class="mobile-tasks-head">
+      <div class="thead ${stg(0)}">
+        <div class="big disp" data-count="${g.open.length}">${g.open.length}</div>
+        <p>open tasks<small>${g.today.length} due today or overdue</small></p>
+      </div>
+      <div class="${stg(1)}" style="margin-bottom: 14px;">
+        ${segHtml("taskTab", tabsData, S.taskTab)}
+      </div>
     </div>
-  </div>
-  <div class="desk-tasks-content ${stg(2)}">${body}</div>
- </div>`;
+
+    <div class="desk-tasks-bar card ${stg(0)}">
+      <div class="desk-tasks-stats">
+        <div class="dt-stat">
+          <span class="dt-stat-val disp">${g.open.length}</span>
+          <span class="dt-stat-lbl">Open</span>
+        </div>
+        <div class="dt-stat-sep"></div>
+        <div class="dt-stat">
+          <span class="dt-stat-val disp" style="color: var(--hi);">${g.today.length}</span>
+          <span class="dt-stat-lbl">Due Today</span>
+        </div>
+        <div class="dt-stat-sep"></div>
+        <div class="dt-stat">
+          <span class="dt-stat-val disp" style="color: var(--k2);">${g.done.length}</span>
+          <span class="dt-stat-lbl">Done</span>
+        </div>
+      </div>
+      <div class="desk-tasks-quick">
+        <input id="qain-desk" class="inp" placeholder="Add a task, e.g. 'Renew passport fri !high'..." autocomplete="off">
+        <button class="pillbtn press" data-act="qaadd-desk">${ic("plus", 16)}<span>Add</span></button>
+      </div>
+    </div>
+
+    <div class="tasks-content ${stg(2)}">
+      ${body}
+    </div>
+  </div>`;
 }
 
 /* ================= TRACK ================= */
@@ -1854,25 +2036,35 @@ function saveComposer() {
   fillTimes();
   const rep = REP[C.repeat] || null;
   if (C.editId) {
-    const it = S.items.find((x) => x.id === C.editId);
-    if (!it) return closeSheet();
-    Object.assign(it, { title });
-    if (T === "event")
-      Object.assign(it, {
-        date: C.date,
-        start: C.start,
-        end: C.end,
-        loc: C.loc,
-        notes: C.notes,
-        k: C.k,
-        repeat: rep,
-      });
-    if (T === "reminder")
-      Object.assign(it, { date: C.date, start: C.start, k: C.k, repeat: rep });
-    if (T === "birthday") it.date = C.date;
-    if (T === "task")
-      Object.assign(it, { date: C.date || null, pri: C.pri, notes: C.notes });
-    toast("Changes saved");
+    if (T === "countdown") {
+      const cd = S.cds.find((x) => x.id === C.editId);
+      if (cd) {
+        cd.title = title;
+        cd.date = C.date;
+        cd.emoji = C.emoji;
+        toast("Countdown updated");
+      }
+    } else {
+      const it = S.items.find((x) => x.id === C.editId);
+      if (!it) return closeSheet();
+      Object.assign(it, { title });
+      if (T === "event")
+        Object.assign(it, {
+          date: C.date,
+          start: C.start,
+          end: C.end,
+          loc: C.loc,
+          notes: C.notes,
+          k: C.k,
+          repeat: rep,
+        });
+      if (T === "reminder")
+        Object.assign(it, { date: C.date, start: C.start, k: C.k, repeat: rep });
+      if (T === "birthday") it.date = C.date;
+      if (T === "task")
+        Object.assign(it, { date: C.date || null, pri: C.pri, notes: C.notes });
+      toast("Changes saved");
+    }
   } else if (T === "event") {
     const e = ev(title, C.date, C.start, C.end, C.k, {
       repeat: rep,
@@ -2001,7 +2193,7 @@ function cdSheet(id) {
   if (!c) return "";
   const p = cdParts(c),
     days = diffD(todayKey(), c.date);
-  return `<div class="shead"><div style="font-size:44px;line-height:1">${c.emoji}</div><div><h2 class="disp">${esc(c.title)}</h2><small>${longDate(c.date)}</small></div></div><section class="card dl"><div class="mrow"><span>${days >= 0 ? "Time left" : "Passed"}</span><span class="num">${days >= 0 ? `${p.d}d ${p.h}h ${p.m}m` : `${-days} days ago`}</span></div><div class="mrow"><span>Weeks</span><span class="num">${(Math.abs(days) / 7).toFixed(1)}</span></div><div class="mrow"><span>Started</span><span class="num">${c.created}</span></div></section><div class="sgroup"><button class="btn dng press" data-act="cddel" data-id="${c.id}">${ic("trash", 18)}Delete countdown</button></div>`;
+  return `<div class="shead"><div style="font-size:44px;line-height:1">${c.emoji}</div><div><h2 class="disp">${esc(c.title)}</h2><small>${longDate(c.date)}</small></div></div><section class="card dl"><div class="mrow"><span>${days >= 0 ? "Time left" : "Passed"}</span><span class="num">${days >= 0 ? `${p.d}d ${p.h}h ${p.m}m` : `${-days} days ago`}</span></div><div class="mrow"><span>Weeks</span><span class="num">${(Math.abs(days) / 7).toFixed(1)}</span></div><div class="mrow"><span>Started</span><span class="num">${c.created}</span></div></section><div class="sgroup" style="display:flex;gap:10px"><button class="btn sec press" style="flex:1" data-act="cdedit" data-id="${c.id}">${ic("edit", 18)}Edit</button><button class="btn dng press" style="flex:1" data-act="cddel" data-id="${c.id}">${ic("trash", 18)}Delete</button></div>`;
 }
 function backdateSheet(id) {
   return `<div class="shead"><div><h2 class="disp">Backdate entry</h2><small>When did it happen?</small></div></div>${fld("Date", `<input class="inp" type="date" id="bd-date" max="${todayKey()}" value="${addKey(todayKey(), -1)}">`)}<div class="sgroup"><button class="btn press" data-act="bdsave" data-id="${id}">${ic("check", 20)}Add entry</button></div>`;
@@ -3275,6 +3467,32 @@ const ACT = {
     });
     refreshAll();
   },
+  cdedit(el) {
+    const c = S.cds.find((x) => x.id === el.dataset.id);
+    if (!c) return;
+    closeSheet();
+    openComposer({
+      type: "countdown",
+      editId: c.id,
+      title: c.title,
+      date: c.date,
+      emoji: c.emoji,
+    });
+  },
+  deskfolder(el) {
+    const id = el.dataset.id;
+    go("pages");
+    const fold = S.folders.find((f) => f.id === id);
+    if (fold) {
+      fold.open = true;
+      saveState();
+      paintPage();
+      setTimeout(() => {
+        const foldEl = document.querySelector(`[data-id="${id}"]`);
+        if (foldEl) foldEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 80);
+    }
+  },
   qaadd() {
     quickAdd();
   },
@@ -3313,10 +3531,35 @@ const ACT = {
     savePrefs();
     paintPage();
   },
-  notifhealth() {
-    toast(
-      "All good: notifications, exact alarms and battery settings are fine",
-    );
+  async notifhealth() {
+    if (!("Notification" in window)) {
+      toast("Notifications not supported in this browser");
+      return;
+    }
+    if (Notification.permission === "granted") {
+      playChime(S.prefs.alarm === "loud");
+      buzz([40, 80]);
+      sendNotification(
+        "Calyx Notification Test",
+        "Exact alarms and sound alerts are working!"
+      );
+      toast("Permissions active! Test chime & notification sent");
+    } else if (Notification.permission === "denied") {
+      toast("Notifications blocked in browser site permissions");
+    } else {
+      const res = await requestNotificationPermission();
+      if (res === "granted") {
+        playChime(S.prefs.alarm === "loud");
+        buzz([40, 80]);
+        sendNotification(
+          "Calyx Notifications Enabled",
+          "You will receive timely reminders and event alerts!"
+        );
+        toast("Permission granted! Test chime played");
+      } else {
+        toast("Notification permission was not granted");
+      }
+    }
   },
   openauth() {
     openSheet(authSheetHtml);
@@ -3345,6 +3588,7 @@ const ACT = {
       S.user = user;
       closeSheet();
       toast("Signed in as " + user.email);
+      setupRealtimeSync();
       const cloudData = await pullStateFromCloud();
       if (cloudData) {
         if (cloudData.items) S.items = cloudData.items;
@@ -3369,6 +3613,7 @@ const ACT = {
       S.user = user;
       closeSheet();
       toast("Account created!");
+      setupRealtimeSync();
       pushStateToCloud(S).catch(() => {});
       paintPage();
     } catch (err) {
@@ -3380,6 +3625,7 @@ const ACT = {
     S.user = null;
     closeSheet();
     toast("Signed out");
+    updateSyncStatus();
     paintPage();
   },
   async syncnow() {
@@ -3584,6 +3830,7 @@ document.addEventListener("pointerup", (e) => {
 /* ================= LIVE CLOCK ================= */
 let lastSig = "";
 function tick() {
+  checkAlarms();
   const n = now();
   const sbt = $("#sbt");
   if (sbt)
@@ -4823,11 +5070,24 @@ function init() {
   setInterval(tick, 1000);
   if (!S.prefs.seen) showWelcome();
 
+  // Register Service Worker for offline PWA
+  if (
+    "serviceWorker" in navigator &&
+    window.location.protocol.startsWith("http")
+  ) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch((err) => {
+        console.warn("ServiceWorker registration failed:", err);
+      });
+    });
+  }
+
   getCurrentUser()
     .then((user) => {
       if (user) {
         S.user = user;
         updateSyncStatus();
+        setupRealtimeSync();
         pullStateFromCloud()
           .then((cloudData) => {
             if (cloudData) {
@@ -4847,4 +5107,76 @@ function init() {
     })
     .catch(() => {});
 }
+
+let stopRealtimeSync = null;
+function setupRealtimeSync() {
+  if (!S.user) return;
+  if (stopRealtimeSync) {
+    stopRealtimeSync();
+    stopRealtimeSync = null;
+  }
+  stopRealtimeSync = subscribeToStateChanges((cloudData) => {
+    if (!cloudData) return;
+    let changed = false;
+    if (
+      cloudData.items &&
+      JSON.stringify(cloudData.items) !== JSON.stringify(S.items)
+    ) {
+      S.items = cloudData.items;
+      changed = true;
+    }
+    if (
+      cloudData.logs &&
+      JSON.stringify(cloudData.logs) !== JSON.stringify(S.logs)
+    ) {
+      S.logs = cloudData.logs;
+      changed = true;
+    }
+    if (
+      cloudData.cds &&
+      JSON.stringify(cloudData.cds) !== JSON.stringify(S.cds)
+    ) {
+      S.cds = cloudData.cds;
+      changed = true;
+    }
+    if (
+      cloudData.pages &&
+      JSON.stringify(cloudData.pages) !== JSON.stringify(S.pages)
+    ) {
+      S.pages = cloudData.pages;
+      changed = true;
+    }
+    if (
+      cloudData.folders &&
+      JSON.stringify(cloudData.folders) !== JSON.stringify(S.folders)
+    ) {
+      S.folders = cloudData.folders;
+      changed = true;
+    }
+    if (cloudData.prefs) {
+      Object.assign(S.prefs, cloudData.prefs);
+      savePrefs();
+      applyPrefs();
+      changed = true;
+    }
+    if (changed) {
+      try {
+        localStorage.setItem(
+          DATA_KEY,
+          JSON.stringify({
+            items: S.items,
+            logs: S.logs,
+            cds: S.cds,
+            pages: S.pages,
+            folders: S.folders,
+            prefs: S.prefs,
+          }),
+        );
+      } catch (e) {}
+      refreshAll();
+      toast("Synced from another device");
+    }
+  });
+}
+
 init();

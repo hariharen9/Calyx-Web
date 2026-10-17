@@ -863,17 +863,33 @@ body {
 }
 
 /* tasks */
+.tasks-page {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+.mobile-tasks-head {
+  display: block;
+}
+.desk-tasks-bar {
+  display: none;
+}
 .trow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px var(--pad);
+  gap: 14px;
+  padding: 13px var(--pad);
   position: relative;
   overflow: hidden;
   transition:
+    background-color 0.18s var(--ease),
     max-height 0.38s var(--ease),
     opacity 0.3s,
     padding 0.38s var(--ease);
+}
+.trow:hover {
+  background: var(--surface2);
 }
 .trow + .trow {
   border-top: 1px solid var(--hair);
@@ -935,6 +951,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  text-align: left;
+  cursor: pointer;
 }
 .ttl {
   font-size: 16px;
@@ -3817,6 +3835,15 @@ html[data-density="compact"] .day {
     background: #10b981;
     box-shadow: 0 0 6px #10b981;
   }
+  .sync-dot.syncing {
+    background: #f59e0b !important;
+    box-shadow: 0 0 8px #f59e0b;
+    animation: syncPulse 0.8s infinite alternate ease-in-out;
+  }
+  @keyframes syncPulse {
+    from { opacity: 0.4; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1.15); }
+  }
   .desk-sync-pill span {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -3918,28 +3945,83 @@ html[data-density="compact"] .day {
   }
 
   /* Desktop Tasks Layout */
-  .desk-tasks-split {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    gap: 28px;
-    align-items: start;
+  .mobile-tasks-head {
+    display: none !important;
   }
-  .desk-tasks-nav {
-    padding: 18px;
+  .desk-tasks-bar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    gap: 20px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    border: var(--bw) solid var(--line);
+    box-shadow: var(--shadow);
+    margin-bottom: 6px;
+  }
+  .desk-tasks-stats {
     display: flex;
-    flex-direction: column;
-    gap: 16px;
+    align-items: center;
+    gap: 18px;
+    flex: none;
+  }
+  .dt-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+  }
+  .dt-stat-val {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+  }
+  .dt-stat-lbl {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .dt-stat-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--line);
   }
   .desk-tasks-quick {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 10px;
+    flex: 1;
+    max-width: 480px;
+    align-items: center;
   }
   .desk-tasks-quick input {
     flex: 1;
-    height: 40px;
-    padding: 0 12px;
+    height: 38px;
+    padding: 0 16px;
     font-size: 13.5px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .desk-tasks-quick input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent-soft);
+  }
+  .desk-tasks-quick .pillbtn {
+    height: 38px;
+    padding: 0 16px;
+    border-radius: var(--r-pill);
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+    font-size: 13.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
   }
 
   /* Desktop Track Grid */
