@@ -1,0 +1,87 @@
+/* ============ DOCK ============ */
+.dock {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 14px;
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+.tabs {
+  flex: 1;
+  height: 66px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  position: relative;
+  background: var(--nav-bg);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  padding: 6px;
+}
+.tabs .tp {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc((100% - 12px) / 5);
+  border-radius: calc(var(--r-lg) - 6px);
+  background: var(--pill-bg);
+  transform: translateX(calc(var(--idx, 0) * 100%));
+  transition: transform 0.5s var(--spring);
+}
+[data-theme="friendly"] .tabs .tp {
+  border-radius: 22px;
+}
+.tab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: color 0.3s;
+}
+.tab .ic {
+  transition: transform 0.4s var(--spring);
+}
+.tab.on {
+  color: var(--pill-ink);
+}
+.tab.on .ic {
+  transform: translateY(-1px) scale(1.12);
+}
+.tab:active .ic {
+  transform: scale(0.88);
+}
+.fab {
+  width: 66px;
+  height: 66px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-fab);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow);
+  border: var(--bw) solid var(--line);
+  transition: transform 0.3s var(--spring);
+}
+[data-theme="focus"] .fab {
+  box-shadow: 0 0 24px -4px rgba(138, 141, 255, 0.7);
+  border-color: transparent;
+}
+.fab .ic {
+  transition: transform 0.45s var(--spring);
+}
+.fab:active {
+  transform: scale(0.9);
+}
+.fab:active .ic {
+  transform: rotate(90deg);
+}

@@ -1,0 +1,207 @@
+/* ============ HERO ============ */
+.hero {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: var(--pad);
+  background: var(--hero-bg);
+  color: var(--hero-ink);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  text-align: left;
+}
+.hero .hl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--hero-muted);
+  margin-bottom: 6px;
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hero-ring);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    transform: scale(1.7);
+    opacity: 0.35;
+  }
+}
+.hero h2 {
+  font-size: 27px;
+  margin-bottom: 6px;
+}
+.hero .hl2 {
+  font-size: 14px;
+  color: var(--hero-muted);
+  font-weight: 600;
+}
+.hero .hnext {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--hero-track);
+  font-size: 13px;
+  color: var(--hero-muted);
+  font-weight: 600;
+}
+.hero .hnext b {
+  color: var(--hero-ink);
+}
+.ring {
+  position: relative;
+  width: 118px;
+  height: 118px;
+}
+.ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  filter: var(--ringfx);
+}
+.ring circle {
+  fill: none;
+  stroke-width: 7;
+}
+.ring .trk {
+  stroke: var(--hero-track);
+}
+.ring .prg {
+  stroke: var(--hero-ring);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+[data-theme="editorial"] .ring circle {
+  stroke-linecap: butt;
+}
+.ring .rt {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ring .rt b {
+  font-size: 25px;
+}
+.ring .rt small {
+  font-size: 11px;
+  color: var(--hero-muted);
+  font-weight: 700;
+  margin-top: 1px;
+}
+[data-theme="editorial"] .ring .rt b {
+  font-size: 30px;
+}
+
+/* ============ GLANCE ============ */
+.glance {
+  padding: var(--pad);
+  margin-bottom: 14px;
+}
+.sh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 4px 10px;
+  font-weight: 700;
+}
+.sh h3 {
+  font-size: 19px;
+}
+.sh button {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 700;
+}
+.glance .sh {
+  margin: 0 0 12px;
+}
+.strip {
+  position: relative;
+  height: 46px;
+  background: var(--surface2);
+  border-radius: var(--r-sm);
+}
+.blk {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  background: var(--c);
+  border-radius: calc(var(--r-sm) - 3px);
+  min-width: 4px;
+  transition:
+    transform 0.2s var(--ease),
+    opacity 0.3s;
+}
+.blk.past {
+  opacity: 0.38;
+}
+.blk:active {
+  transform: scaleY(0.9);
+}
+.nowm {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 3px;
+  margin-left: -1.5px;
+  background: var(--text);
+  border-radius: 2px;
+  z-index: 2;
+}
+.nowm::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text);
+}
+.hrs {
+  position: relative;
+  height: 18px;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.hrs span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+}
+.stats > div {
+  padding-left: 12px;
+  border-left: 1px solid var(--hair);
+}
+.stats > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.stats b {
+  display: block;
+  font-size: 26px;
+}
+.stats small {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
