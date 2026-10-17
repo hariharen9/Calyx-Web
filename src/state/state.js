@@ -34,6 +34,7 @@ export const S = {
   rollId: null,
   prefs: {
     theme: "calm",
+    mode: "system",
     hour: "24h",
     week: 1,
     haptics: "full",
@@ -80,11 +81,56 @@ export const buzz = (n) => {
   } catch (e) {}
 };
 
+export function getResolvedMode() {
+  const m = S.prefs.mode || "system";
+  if (m === "system") {
+    return window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+  return m;
+}
+
 export function applyPrefs() {
   const h = document.documentElement;
-  h.dataset.theme = S.prefs.theme;
-  h.dataset.density = S.prefs.density;
+  h.dataset.theme = S.prefs.theme || "calm";
+  h.dataset.density = S.prefs.density || "comfortable";
+  const resolvedMode = getResolvedMode();
+  h.dataset.mode = resolvedMode;
   h.classList.toggle("rm", !!S.prefs.reduce);
+
+  // Sync theme-color meta tag for browser chrome/mobile address bar
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) {
+    const isDark = resolvedMode === "dark";
+    const themeBgMap = {
+      calm: isDark ? "#131918" : "#2e6f68",
+      editorial: isDark ? "#0c0c0e" : "#1f3dff",
+      friendly: isDark ? "#16102a" : "#6c4bff",
+      focus: isDark ? "#0b0c10" : "#5053e8",
+    };
+    metaTheme.content = themeBgMap[S.prefs.theme] || (isDark ? "#0b0c10" : "#ffffff");
+  }
+
+  // Sync desktop quick mode button if present
+  const qmLbl = $("#deskQuickModeLabel");
+  if (qmLbl) {
+    qmLbl.textContent = resolvedMode === "dark" ? "Dark Mode" : "Light Mode";
+  }
+}
+
+if (typeof window !== "undefined" && window.matchMedia) {
+  try {
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", () => {
+        if ((S.prefs.mode || "system") === "system") {
+          applyPrefs();
+          if (_refreshAllFn) _refreshAllFn();
+        }
+      });
+  } catch (e) {}
 }
 
 let syncTimer = null;

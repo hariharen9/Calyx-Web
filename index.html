@@ -17,6 +17,22 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles.css" />
+    <script>
+      (function () {
+        try {
+          var p = JSON.parse(localStorage.getItem("calyx.prefs") || "null");
+          if (p) {
+            if (p.theme) document.documentElement.dataset.theme = p.theme;
+            var m = p.mode || "system";
+            var resolved = m === "system" ? (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : m;
+            document.documentElement.dataset.mode = resolved;
+          } else {
+            var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.dataset.mode = prefersDark ? "dark" : "light";
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div class="shell" id="shell">
@@ -199,6 +215,24 @@
           >
             <span class="sync-dot" id="deskSyncDot"></span>
             <span id="deskSyncLabel">Local Offline</span>
+          </button>
+          <button
+            class="desk-footer-btn press"
+            data-act="quickmode"
+            id="deskQuickMode"
+            aria-label="Toggle light or dark mode"
+          >
+            <svg
+              class="ic"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" />
+            </svg>
+            <span id="deskQuickModeLabel">Theme Mode</span>
           </button>
           <button
             class="desk-footer-btn press"

@@ -1,4 +1,4 @@
-import { S, saveState, savePrefs, applyPrefs, reduced, buzz, exportJsonBackup, triggerImportJson, exportIcsCalendar, triggerImportIcs } from "../state/state.js";
+import { S, saveState, savePrefs, applyPrefs, getResolvedMode, reduced, buzz, exportJsonBackup, triggerImportJson, exportIcsCalendar, triggerImportIcs } from "../state/state.js";
 import { signInWithEmail, signUpWithEmail, signOutUser, pushStateToCloud, pullStateFromCloud, saveSupabaseConfig } from "../supabase.js";
 import { $, $$, esc, todayKey, pd, ymd, addKey, uid } from "../utils/helpers.js";
 import { ic } from "../utils/icons.js";
@@ -10,7 +10,7 @@ import { UI, openSheet, closeSheet, paintSheet, openPage, closePage, paintPage, 
 import { C, openComposer, saveComposer, fillTimes } from "../components/composer.js";
 import { CMD, openCmd, closeCmd, paintCmd, quickAdd } from "../components/command-bar.js";
 import { dayList, shiftMonth, slideWeek } from "../views/calendar.js";
-import { settingsHtml, setTheme } from "../views/settings.js";
+import { settingsHtml, setTheme, setMode } from "../views/settings.js";
 import { PG, FS, setFS, curPage, touchPage, autosize, updWc, renderBlocks, openPageEditor, newPage, pickSlash, blocksToMd, pageMenuHtml, moveHtml, emojiHtml, folderSheetHtml, turnHtml } from "../views/pages.js";
 
 /* ================= NAVIGATION ================= */
@@ -57,6 +57,9 @@ export const SEGH = {
     if (C) {
       C.pri = v;
     }
+  },
+  mode: (v, ev) => {
+    setMode(v, ev);
   },
   hour: (v) => {
     S.prefs.hour = v;
@@ -472,6 +475,12 @@ export const ACT = {
     $$(".tcard").forEach((c) =>
       c.classList.toggle("sel", c.dataset.t === el.dataset.t),
     );
+    buzz(12);
+  },
+  quickmode(el, e) {
+    const resolved = getResolvedMode();
+    const next = resolved === "dark" ? "light" : "dark";
+    setMode(next, e);
     buzz(12);
   },
   tgreduce() {

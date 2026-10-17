@@ -21,7 +21,7 @@ export function initEventListeners() {
       btns.forEach((b) => b.classList.toggle("on", b === seg));
       if (wrap) wrap.style.setProperty("--i", btns.indexOf(seg));
       buzz(6);
-      setTimeout(() => SEGH[key] && SEGH[key](val), wrap && !reduced() ? 190 : 0);
+      setTimeout(() => SEGH[key] && SEGH[key](val, e), wrap && !reduced() ? 190 : 0);
       return;
     }
     const el = e.target.closest("[data-act]");

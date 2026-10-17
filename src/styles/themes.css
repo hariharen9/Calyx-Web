@@ -10,8 +10,42 @@ html {
   scroll-padding-top: env(safe-area-inset-top, 0px);
 }
 
-/* ============ THEME TOKENS ============ */
+:root[data-mode="dark"] {
+  color-scheme: dark;
+}
+:root[data-mode="light"] {
+  color-scheme: light;
+}
+
+/* ==========================================================================
+   1. CALM THEME (Organic, tranquil sage / eucalyptus forest)
+   ========================================================================== */
+/* Structural & Typography */
 [data-theme="calm"] {
+  --font-display: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --font-num: "Outfit", "Avenir Next", system-ui, sans-serif;
+  --dw: 300;
+  --dt: none;
+  --dl: -0.025em;
+  --dlh: 1;
+  --icon-w: 1.5;
+  --cap: round;
+  --r-lg: 22px;
+  --r-md: 16px;
+  --r-sm: 10px;
+  --r-pill: 999px;
+  --r-fab: 24px;
+  --r-chk: 50%;
+  --bw: 1px;
+  --ringfx: none;
+  --pad: 18px;
+}
+
+/* Calm — Light */
+[data-theme="calm"],
+[data-mode="light"] [data-theme="calm"],
+[data-mode="light"][data-theme="calm"] {
   --stage: #d9e0de;
   --bg: #f3f5f4;
   --surface: #ffffff;
@@ -31,30 +65,13 @@ html {
   --hi: #d9583f;
   --md: #e0a23a;
   --lo: #5fa384;
-  --r-lg: 22px;
-  --r-md: 16px;
-  --r-sm: 10px;
-  --r-pill: 999px;
-  --r-fab: 24px;
-  --r-chk: 50%;
-  --bw: 1px;
   --shadow:
     0 1px 2px rgba(27, 38, 36, 0.04), 0 8px 22px -10px rgba(27, 38, 36, 0.14);
-  --font-display: "Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
-  --font-num: "Outfit", "Avenir Next", system-ui, sans-serif;
-  --dw: 300;
-  --dt: none;
-  --dl: -0.025em;
-  --dlh: 1;
-  --icon-w: 1.5;
-  --cap: round;
   --hero-bg: #ffffff;
   --hero-ink: #1b2624;
   --hero-muted: #74827f;
   --hero-track: #e3e9e7;
   --hero-ring: #2e6f68;
-  --ringfx: none;
   --nav-bg: #ffffff;
   --pill-bg: #daeae7;
   --pill-ink: #2e6f68;
@@ -62,9 +79,76 @@ html {
   --seg-thumb: #ffffff;
   --seg-on: #1b2624;
   --backdrop: rgba(20, 32, 30, 0.38);
-  --pad: 18px;
 }
+
+/* Calm — Dark */
+[data-mode="dark"] [data-theme="calm"],
+[data-mode="dark"][data-theme="calm"] {
+  --stage: #0c1211;
+  --bg: #131918;
+  --surface: #1a2221;
+  --surface2: #242f2d;
+  --text: #e8eeec;
+  --muted: #7f918e;
+  --line: #273633;
+  --hair: #1e2a28;
+  --accent: #46a58a;
+  --on-accent: #0b1714;
+  --accent-soft: rgba(70, 165, 138, 0.18);
+  --k1: #6a9cf4;
+  --k2: #46a58a;
+  --k3: #e8b04b;
+  --k4: #e87b99;
+  --k5: #9b8bf0;
+  --hi: #e8634d;
+  --md: #e8b04b;
+  --lo: #58b28f;
+  --shadow:
+    0 1px 3px rgba(0, 0, 0, 0.4), 0 10px 24px -10px rgba(0, 0, 0, 0.55);
+  --hero-bg: #1a2221;
+  --hero-ink: #e8eeec;
+  --hero-muted: #7f918e;
+  --hero-track: #263532;
+  --hero-ring: #46a58a;
+  --nav-bg: #1a2221;
+  --pill-bg: rgba(70, 165, 138, 0.18);
+  --pill-ink: #65cbb5;
+  --seg-bg: #131918;
+  --seg-thumb: #242f2d;
+  --seg-on: #e8eeec;
+  --backdrop: rgba(7, 13, 12, 0.75);
+}
+
+/* ==========================================================================
+   2. EDITORIAL THEME (Brutalist Swiss print, heavy lines, electric cobalt)
+   ========================================================================== */
+/* Structural & Typography */
 [data-theme="editorial"] {
+  --font-display: "Anton", "Impact", "Arial Narrow", sans-serif;
+  --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-num: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --dw: 400;
+  --dt: uppercase;
+  --dl: 0.012em;
+  --dlh: 0.96;
+  --icon-w: 2.4;
+  --cap: square;
+  --r-lg: 0px;
+  --r-md: 0px;
+  --r-sm: 0px;
+  --r-pill: 0px;
+  --r-fab: 0px;
+  --r-chk: 0px;
+  --bw: 2px;
+  --shadow: none;
+  --ringfx: none;
+  --pad: 16px;
+}
+
+/* Editorial — Light */
+[data-theme="editorial"],
+[data-mode="light"] [data-theme="editorial"],
+[data-mode="light"][data-theme="editorial"] {
   --stage: #c9c9c4;
   --bg: #f6f6f2;
   --surface: #ffffff;
@@ -84,29 +168,11 @@ html {
   --hi: #ff2a2a;
   --md: #ffb400;
   --lo: #00a86b;
-  --r-lg: 0px;
-  --r-md: 0px;
-  --r-sm: 0px;
-  --r-pill: 0px;
-  --r-fab: 0px;
-  --r-chk: 0px;
-  --bw: 2px;
-  --shadow: none;
-  --font-display: "Anton", "Impact", "Arial Narrow", sans-serif;
-  --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-num: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --dw: 400;
-  --dt: uppercase;
-  --dl: 0.012em;
-  --dlh: 0.96;
-  --icon-w: 2.4;
-  --cap: square;
   --hero-bg: #1f3dff;
   --hero-ink: #ffffff;
   --hero-muted: rgba(255, 255, 255, 0.78);
   --hero-track: rgba(255, 255, 255, 0.28);
   --hero-ring: #ffe600;
-  --ringfx: none;
   --nav-bg: #ffffff;
   --pill-bg: #0a0a0a;
   --pill-ink: #ffffff;
@@ -114,9 +180,73 @@ html {
   --seg-thumb: #0a0a0a;
   --seg-on: #ffffff;
   --backdrop: rgba(10, 10, 10, 0.5);
-  --pad: 16px;
 }
+
+/* Editorial — Dark */
+[data-mode="dark"] [data-theme="editorial"],
+[data-mode="dark"][data-theme="editorial"] {
+  --stage: #000000;
+  --bg: #0c0c0e;
+  --surface: #161619;
+  --surface2: #222227;
+  --text: #f5f5f2;
+  --muted: #959590;
+  --line: #f5f5f2;
+  --hair: #34343a;
+  --accent: #4666ff;
+  --on-accent: #ffffff;
+  --accent-soft: rgba(70, 102, 255, 0.22);
+  --k1: #4666ff;
+  --k2: #00e08f;
+  --k3: #ffbf1a;
+  --k4: #ff4785;
+  --k5: #904dff;
+  --hi: #ff3838;
+  --md: #ffbf1a;
+  --lo: #00e08f;
+  --hero-bg: #4666ff;
+  --hero-ink: #ffffff;
+  --hero-muted: rgba(255, 255, 255, 0.82);
+  --hero-track: rgba(255, 255, 255, 0.28);
+  --hero-ring: #ffe600;
+  --nav-bg: #161619;
+  --pill-bg: #f5f5f2;
+  --pill-ink: #0c0c0e;
+  --seg-bg: #161619;
+  --seg-thumb: #f5f5f2;
+  --seg-on: #0c0c0e;
+  --backdrop: rgba(0, 0, 0, 0.78);
+}
+
+/* ==========================================================================
+   3. FRIENDLY THEME (Playful curves, borderless floating cards, glowing soft shadow)
+   ========================================================================== */
+/* Structural & Typography */
 [data-theme="friendly"] {
+  --font-display: "Fredoka", "Nunito", "Trebuchet MS", sans-serif;
+  --font-body: "Nunito", "Trebuchet MS", system-ui, sans-serif;
+  --font-num: "Fredoka", "Nunito", system-ui, sans-serif;
+  --dw: 600;
+  --dt: none;
+  --dl: -0.005em;
+  --dlh: 1.02;
+  --icon-w: 2.2;
+  --cap: round;
+  --r-lg: 30px;
+  --r-md: 22px;
+  --r-sm: 14px;
+  --r-pill: 999px;
+  --r-fab: 50%;
+  --r-chk: 50%;
+  --bw: 0px;
+  --ringfx: none;
+  --pad: 20px;
+}
+
+/* Friendly — Light */
+[data-theme="friendly"],
+[data-mode="light"] [data-theme="friendly"],
+[data-mode="light"][data-theme="friendly"] {
   --stage: #dbd2f8;
   --bg: #f1edff;
   --surface: #ffffff;
@@ -136,29 +266,12 @@ html {
   --hi: #ff5c7a;
   --md: #ffae2e;
   --lo: #2fcb97;
-  --r-lg: 30px;
-  --r-md: 22px;
-  --r-sm: 14px;
-  --r-pill: 999px;
-  --r-fab: 50%;
-  --r-chk: 50%;
-  --bw: 0px;
   --shadow: 0 12px 28px -14px rgba(108, 75, 255, 0.35);
-  --font-display: "Fredoka", "Nunito", "Trebuchet MS", sans-serif;
-  --font-body: "Nunito", "Trebuchet MS", system-ui, sans-serif;
-  --font-num: "Fredoka", "Nunito", system-ui, sans-serif;
-  --dw: 600;
-  --dt: none;
-  --dl: -0.005em;
-  --dlh: 1.02;
-  --icon-w: 2.2;
-  --cap: round;
   --hero-bg: #6c4bff;
   --hero-ink: #ffffff;
   --hero-muted: rgba(255, 255, 255, 0.82);
   --hero-track: rgba(255, 255, 255, 0.26);
   --hero-ring: #ffe27a;
-  --ringfx: none;
   --nav-bg: #ffffff;
   --pill-bg: #e2dbff;
   --pill-ink: #6c4bff;
@@ -166,9 +279,112 @@ html {
   --seg-thumb: #ffffff;
   --seg-on: #6c4bff;
   --backdrop: rgba(42, 35, 80, 0.4);
-  --pad: 20px;
 }
+
+/* Friendly — Dark */
+[data-mode="dark"] [data-theme="friendly"],
+[data-mode="dark"][data-theme="friendly"] {
+  --stage: #0e0921;
+  --bg: #16102a;
+  --surface: #221a3d;
+  --surface2: #2e2453;
+  --text: #f4f0ff;
+  --muted: #958abb;
+  --line: transparent;
+  --hair: #2c234e;
+  --accent: #8b6dff;
+  --on-accent: #ffffff;
+  --accent-soft: rgba(139, 109, 255, 0.22);
+  --k1: #5fb1ff;
+  --k2: #34dfa6;
+  --k3: #ffc442;
+  --k4: #ff77af;
+  --k5: #a88dff;
+  --hi: #ff6685;
+  --md: #ffbe3b;
+  --lo: #34dfa6;
+  --shadow:
+    0 14px 34px -10px rgba(0, 0, 0, 0.55), 0 0 20px -8px rgba(139, 109, 255, 0.25);
+  --hero-bg: #744df6;
+  --hero-ink: #ffffff;
+  --hero-muted: rgba(255, 255, 255, 0.85);
+  --hero-track: rgba(255, 255, 255, 0.24);
+  --hero-ring: #ffe47a;
+  --nav-bg: #221a3d;
+  --pill-bg: rgba(139, 109, 255, 0.22);
+  --pill-ink: #beadff;
+  --seg-bg: #16102a;
+  --seg-thumb: #2e2453;
+  --seg-on: #f4f0ff;
+  --backdrop: rgba(15, 10, 33, 0.72);
+}
+
+/* ==========================================================================
+   4. FOCUS THEME (Precision IDE, monospaced digits, glowing hero ring)
+   ========================================================================== */
+/* Structural & Typography */
 [data-theme="focus"] {
+  --font-display: "Geist", "Inter", system-ui, sans-serif;
+  --font-body: "Geist", "Inter", system-ui, sans-serif;
+  --font-num: "Geist Mono", "SF Mono", ui-monospace, monospace;
+  --dw: 600;
+  --dt: none;
+  --dl: -0.045em;
+  --dlh: 1;
+  --icon-w: 1.8;
+  --cap: round;
+  --r-lg: 18px;
+  --r-md: 12px;
+  --r-sm: 8px;
+  --r-pill: 999px;
+  --r-fab: 18px;
+  --r-chk: 7px;
+  --bw: 1px;
+  --shadow: none;
+  --pad: 16px;
+}
+
+/* Focus — Light */
+[data-mode="light"] [data-theme="focus"],
+[data-mode="light"][data-theme="focus"] {
+  --stage: #dfe3ea;
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --surface2: #eaedf4;
+  --text: #11141c;
+  --muted: #626a7e;
+  --line: #d6dce8;
+  --hair: #e4e8f2;
+  --accent: #5053e8;
+  --on-accent: #ffffff;
+  --accent-soft: rgba(80, 83, 232, 0.12);
+  --k1: #3b82f6;
+  --k2: #059669;
+  --k3: #d97706;
+  --k4: #db2777;
+  --k5: #7c3aed;
+  --hi: #dc2626;
+  --md: #d97706;
+  --lo: #059669;
+  --hero-bg: #ffffff;
+  --hero-ink: #11141c;
+  --hero-muted: #626a7e;
+  --hero-track: #e6ebf5;
+  --hero-ring: #5053e8;
+  --ringfx: drop-shadow(0 0 6px rgba(80, 83, 232, 0.45));
+  --nav-bg: #ffffff;
+  --pill-bg: rgba(80, 83, 232, 0.12);
+  --pill-ink: #4346cf;
+  --seg-bg: #eaedf4;
+  --seg-thumb: #ffffff;
+  --seg-on: #11141c;
+  --backdrop: rgba(17, 20, 28, 0.45);
+}
+
+/* Focus — Dark (Default fallback) */
+[data-theme="focus"],
+[data-mode="dark"] [data-theme="focus"],
+[data-mode="dark"][data-theme="focus"] {
   --stage: #050508;
   --bg: #0b0c10;
   --surface: #14161c;
@@ -188,23 +404,6 @@ html {
   --hi: #ff6b6b;
   --md: #f5b45a;
   --lo: #3ecf9a;
-  --r-lg: 18px;
-  --r-md: 12px;
-  --r-sm: 8px;
-  --r-pill: 999px;
-  --r-fab: 18px;
-  --r-chk: 7px;
-  --bw: 1px;
-  --shadow: none;
-  --font-display: "Geist", "Inter", system-ui, sans-serif;
-  --font-body: "Geist", "Inter", system-ui, sans-serif;
-  --font-num: "Geist Mono", "SF Mono", ui-monospace, monospace;
-  --dw: 600;
-  --dt: none;
-  --dl: -0.045em;
-  --dlh: 1;
-  --icon-w: 1.8;
-  --cap: round;
   --hero-bg: #14161c;
   --hero-ink: #eceef4;
   --hero-muted: #7d8596;
@@ -218,5 +417,4 @@ html {
   --seg-thumb: #2b2f3b;
   --seg-on: #eceef4;
   --backdrop: rgba(0, 0, 0, 0.6);
-  --pad: 16px;
 }

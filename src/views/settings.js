@@ -21,13 +21,13 @@ export function setSettingsRefreshFn(fn) {
 }
 
 export function setTheme(t, ev) {
+  if (t === S.prefs.theme) return;
   const apply = () => {
-    document.documentElement.dataset.theme = t;
     S.prefs.theme = t;
     savePrefs();
+    applyPrefs();
     if (_refreshAllFn) _refreshAllFn();
   };
-  if (t === S.prefs.theme) return;
   if (document.startViewTransition && !reduced()) {
     const x = (ev && ev.clientX) || innerWidth / 2,
       y = (ev && ev.clientY) || innerHeight / 2,
@@ -44,7 +44,47 @@ export function setTheme(t, ev) {
               ],
             },
             {
-              duration: 700,
+              duration: 650,
+              easing: "cubic-bezier(.4,0,.2,1)",
+              pseudoElement: "::view-transition-new(root)",
+            },
+          ),
+        )
+        .catch(() => {});
+      return;
+    } catch (e) {}
+  }
+  const h = document.documentElement;
+  h.classList.add("tx");
+  apply();
+  setTimeout(() => h.classList.remove("tx"), 550);
+}
+
+export function setMode(m, ev) {
+  if (m === S.prefs.mode) return;
+  const apply = () => {
+    S.prefs.mode = m;
+    savePrefs();
+    applyPrefs();
+    if (_refreshAllFn) _refreshAllFn();
+  };
+  if (document.startViewTransition && !reduced()) {
+    const x = (ev && ev.clientX) || innerWidth / 2,
+      y = (ev && ev.clientY) || innerHeight / 2,
+      r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    try {
+      const tr = document.startViewTransition(apply);
+      tr.ready
+        .then(() =>
+          document.documentElement.animate(
+            {
+              clipPath: [
+                `circle(0px at ${x}px ${y}px)`,
+                `circle(${r}px at ${x}px ${y}px)`,
+              ],
+            },
+            {
+              duration: 650,
               easing: "cubic-bezier(.4,0,.2,1)",
               pseudoElement: "::view-transition-new(root)",
             },
@@ -63,7 +103,16 @@ export function setTheme(t, ev) {
 export function settingsHtml() {
   const P = S.prefs;
   let h = `<div class="phead"><button class="ibtn press" data-act="back" aria-label="Back">${ic("chevL")}</button><h2 class="disp">Settings</h2></div><div class="pbody">`;
-  h += `<div class="ssec">Look and feel</div><section class="card" style="padding:14px 0 4px"><div class="tcards" style="margin:0;padding:2px 16px 10px">${THEMES.map(([id, n]) => `<button class="tcard ${P.theme === id ? "sel" : ""}" data-theme="${id}" data-act="theme" data-t="${id}"><div class="mh"></div><div class="ml"></div><div class="ml s"></div><div class="mn disp">14</div><div class="nm">${n}</div></button>`).join("")}</div><div class="srow"><div><b>Reduce motion</b><small>Simpler transitions, no bounce</small></div>${tog(P.reduce, "tgreduce")}</div><div class="srow col"><div><b>Haptics</b><small>Vibration feedback on taps and check-offs</small></div><div style="margin-top:10px">${segHtml(
+  h += `<div class="ssec">Look and feel</div><section class="card" style="padding:14px 0 4px"><div class="srow col" style="padding-bottom:14px;border-bottom:1px solid var(--hair)"><div><b>Appearance mode</b><small>Light, Dark, or automatically match system</small></div><div style="margin-top:10px">${segHtml(
+    "mode",
+    [
+      ["light", "Light"],
+      ["dark", "Dark"],
+      ["system", "System"],
+    ],
+    P.mode || "system",
+    "sm",
+  )}</div></div><div class="srow col" style="padding-bottom:6px"><div><b>Theme design</b><small>Each design adapts seamlessly to both light & dark modes</small></div></div><div class="tcards" style="margin:0;padding:2px 16px 10px">${THEMES.map(([id, n]) => `<button class="tcard ${P.theme === id ? "sel" : ""}" data-theme="${id}" data-act="theme" data-t="${id}"><div class="mh"></div><div class="ml"></div><div class="ml s"></div><div class="mn disp">14</div><div class="nm">${n}</div></button>`).join("")}</div><div class="srow"><div><b>Reduce motion</b><small>Simpler transitions, no bounce</small></div>${tog(P.reduce, "tgreduce")}</div><div class="srow col"><div><b>Haptics</b><small>Vibration feedback on taps and check-offs</small></div><div style="margin-top:10px">${segHtml(
     "haptics",
     [
       ["off", "Off"],
