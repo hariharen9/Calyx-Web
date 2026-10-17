@@ -191,7 +191,7 @@ export function init() {
     ["track", "Track", "track"],
   ];
   const tabsEl = $("#tabs");
-  if (tabsEl && !tabsEl.children.length)
+  if (tabsEl && !tabsEl.querySelector(".tab"))
     tabsEl.insertAdjacentHTML(
       "beforeend",
       tabs

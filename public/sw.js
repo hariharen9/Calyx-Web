@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calyx-cache-v3';
+const CACHE_NAME = 'calyx-cache-v9';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

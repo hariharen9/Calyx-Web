@@ -1,4 +1,4 @@
-import { S, saveState, reduced, buzz } from "../state/state.js";
+import { S, saveState, reduced, buzz, updateDeskBadges, updateDeskTopbar } from "../state/state.js";
 import { getSupabase, getSupabaseConfig } from "../supabase.js";
 import { $, $$, esc, todayKey, nowMin, diffD, clamp, pad, MIN, addKey } from "../utils/helpers.js";
 import { ic, TYPELABEL } from "../utils/icons.js";
@@ -207,10 +207,16 @@ export function syncDock() {
   $$("#tabs .tab").forEach((b) =>
     b.classList.toggle("on", b.dataset.tab === S.tab),
   );
+  $$(".desk-nav-item").forEach((b) =>
+    b.classList.toggle("on", b.dataset.tab === S.tab),
+  );
   const qa = $("#qa");
   if (qa) qa.classList.toggle("show", S.tab === "tasks");
   const main = $("#main");
   if (main) main.classList.toggle("tq", S.tab === "tasks");
+
+  updateDeskBadges();
+  updateDeskTopbar();
 }
 
 export function ripple(btn) {

@@ -226,6 +226,31 @@
       <div class="stage" id="stage">
         <div class="phone" id="phone">
           <div class="app" id="app">
+            <!-- Mobile Header (Mobile only) -->
+            <header class="mobile-header" id="mobileHeader">
+              <div class="mobile-brand">
+                <div class="mobile-logo">
+                  <svg
+                    class="ic"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <path
+                      d="M6 3h12M6 21h12M7 3c0 5.5 5 6.5 5 9s-5 3.5-5 9M17 3c0 5.5-5 6.5-5 9s5 3.5 5 9"
+                    />
+                  </svg>
+                </div>
+                <span class="mobile-logo-text">Calyx</span>
+              </div>
+              <div class="mobile-header-right">
+                <span class="sync-dot" id="mobSyncDot"></span>
+                <span class="mobile-sync-label" id="mobSyncLabel">Local</span>
+              </div>
+            </header>
+
             <!-- Desktop Topbar (Desktop only) -->
             <header class="desk-topbar" id="deskTopbar">
               <div class="desk-topbar-left">
@@ -260,11 +285,11 @@
                 <span id="toastmsg"></span
                 ><button id="toastact" data-act="toastact">Undo</button>
               </div>
-              <div id="overlays"></div>
             </div>
           </div>
         </div>
       </div>
+      <div id="overlays"></div>
     </div>
     <script type="module" src="/app.js"></script>
   </body>

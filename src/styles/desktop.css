@@ -3,6 +3,9 @@
   .status {
     display: none !important;
   }
+  .mobile-header {
+    display: none !important;
+  }
   .dock {
     display: none !important;
   }
@@ -497,17 +500,38 @@
   }
 
   /* Desktop Overlays & Modals */
+  #overlays {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 1000 !important;
+    pointer-events: none !important;
+  }
   .layer {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 1000 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: var(--backdrop);
-    backdrop-filter: blur(8px);
-    padding: 24px;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 24px !important;
+    pointer-events: none;
+  }
+  .layer.on {
+    pointer-events: auto !important;
   }
   .layer .bd {
-    position: absolute;
-    inset: 0;
+    position: absolute !important;
+    inset: 0 !important;
+    background: var(--backdrop) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    opacity: 0;
+    transition: opacity 0.35s ease !important;
+  }
+  .layer.open .bd {
+    opacity: 1 !important;
   }
   .sheet {
     position: relative !important;
@@ -524,6 +548,7 @@
       transform 0.3s var(--spring),
       opacity 0.2s !important;
     overflow-y: auto !important;
+    padding: 28px 24px 26px !important;
   }
   .layer.open .sheet {
     transform: scale(1) !important;
@@ -531,6 +556,9 @@
   }
   .sheet .grab {
     display: none !important;
+  }
+  .sheet .shead {
+    margin-bottom: 18px !important;
   }
 
   .page {
@@ -548,10 +576,35 @@
     transition:
       transform 0.35s var(--spring),
       opacity 0.25s !important;
+    z-index: 1000 !important;
+    pointer-events: auto !important;
+  }
+  .page:not(.open) {
+    pointer-events: none !important;
   }
   .page.open {
     transform: translateX(-50%) scale(1) !important;
     opacity: 1 !important;
+  }
+  .page .phead {
+    padding: 18px 24px 14px !important;
+  }
+  .page .pbody {
+    padding: 6px 24px 28px !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  .page .pbody::-webkit-scrollbar {
+    display: block !important;
+    width: 6px;
+  }
+  .page .pbody::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 10px;
+  }
+  .page .pfoot {
+    padding: 14px 24px 22px !important;
   }
 
   .cmd {

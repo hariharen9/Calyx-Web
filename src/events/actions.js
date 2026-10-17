@@ -435,7 +435,7 @@ export const ACT = {
     if (fold) {
       fold.open = true;
       saveState();
-      paintPage();
+      render();
       setTimeout(() => {
         const foldEl = document.querySelector(`[data-id="${id}"]`);
         if (foldEl) foldEl.scrollIntoView({ behavior: "smooth", block: "nearest" });

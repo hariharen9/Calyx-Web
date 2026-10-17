@@ -159,18 +159,15 @@ export function updateDeskBadges() {
       (i) => i.type === "task" && !i.done,
     ).length;
     tb.textContent = openTasks;
-    tb.style.display = openTasks > 0 ? "" : "none";
   }
   const pb = $("#deskPagesBadge");
   if (pb) {
     pb.textContent = S.pages ? S.pages.length : 0;
-    pb.style.display = S.pages && S.pages.length > 0 ? "" : "none";
   }
   const trb = $("#deskTrackBadge");
   if (trb) {
     const total = (S.logs ? S.logs.length : 0) + (S.cds ? S.cds.length : 0);
     trb.textContent = total;
-    trb.style.display = total > 0 ? "" : "none";
   }
 
   const fl = $("#deskFoldersList");
@@ -193,6 +190,8 @@ export function updateDeskBadges() {
 export function updateSyncStatus() {
   const dot = $("#deskSyncDot");
   const lbl = $("#deskSyncLabel");
+  const mobDot = $("#mobSyncDot");
+  const mobLbl = $("#mobSyncLabel");
   if (dot && lbl) {
     if (S.user) {
       dot.classList.add("online");
@@ -202,6 +201,15 @@ export function updateSyncStatus() {
       dot.classList.remove("online");
       lbl.textContent = "Local (Offline)";
       lbl.title = "Click to connect Supabase";
+    }
+  }
+  if (mobDot && mobLbl) {
+    if (S.user) {
+      mobDot.classList.add("online");
+      mobLbl.textContent = S.user.email.split("@")[0];
+    } else {
+      mobDot.classList.remove("online");
+      mobLbl.textContent = "Local";
     }
   }
 }
