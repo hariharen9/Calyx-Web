@@ -47,8 +47,8 @@
     position: absolute;
     inset: 0;
     padding: 28px 40px 64px;
-    max-width: 1440px;
-    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
     scrollbar-width: thin;
     scrollbar-color: var(--line) transparent;
   }
@@ -242,20 +242,53 @@
     color: var(--accent);
   }
 
+  /* Nested Folders under Pages (only shown when Pages is active) */
+  .desk-nav-branch {
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-sub-folders {
+    display: none;
+    flex-direction: column;
+    margin: 3px 0 6px 16px;
+    padding-left: 12px;
+    border-left: 1.5px solid var(--line);
+    gap: 2px;
+  }
+  .desk-nav-item.on + .desk-sub-folders,
+  .desk-nav-branch:has(.desk-nav-item.on) .desk-sub-folders {
+    display: flex;
+    animation: fadeInSub 0.22s var(--ease);
+  }
+  .desk-sub-folders:empty {
+    display: none !important;
+  }
+  @keyframes fadeInSub {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
   .desk-folder-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: var(--r-sm);
     color: var(--muted);
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 500;
-    margin-bottom: 2px;
+    transition: background-color 0.2s, color 0.2s;
   }
   .desk-folder-item .fe {
-    font-size: 16px;
+    font-size: 14px;
+    line-height: 1;
+    flex: none;
   }
   .desk-folder-item span {
     flex: 1;
@@ -266,11 +299,22 @@
   }
   .desk-folder-item small {
     color: var(--muted);
+    font-size: 11px;
     font-weight: 700;
+    font-family: var(--font-num);
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: var(--r-pill);
+    flex: none;
+    transition: background-color 0.2s, color 0.2s;
   }
   .desk-folder-item:hover {
     background: var(--surface2);
     color: var(--text);
+  }
+  .desk-folder-item:hover small {
+    background: var(--accent-soft);
+    color: var(--accent);
   }
 
   .desk-sidebar-footer {
@@ -364,25 +408,104 @@
   .desk-topbar-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .desk-topbar-seg {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
   }
   .desk-topbar-seg .seg {
-    height: 38px;
+    margin: 0 !important;
+    height: 40px !important;
+    padding: 3px !important;
+    width: max-content !important;
+    min-width: max(calc(var(--n) * 96px), 220px) !important;
+    display: grid !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: 1fr !important;
+    align-items: stretch !important;
+    box-sizing: border-box !important;
+    border-radius: var(--r-pill) !important;
+  }
+  .desk-topbar-seg .seg button {
+    height: 34px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    cursor: pointer;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+  }
+  .desk-topbar-seg .seg button:not(.on):hover {
+    color: var(--text);
+  }
+  .desk-topbar-seg .seg .thumb {
+    top: 3px !important;
+    bottom: 3px !important;
+    left: 3px !important;
+    width: calc((100% - 6px) / var(--n)) !important;
+    border-radius: var(--r-pill) !important;
+  }
+  .desk-topbar-right .pillbtn {
+    height: 40px !important;
+    padding: 0 18px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    flex: none !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .desk-topbar-right .ibtn {
+    height: 40px !important;
+    width: 40px !important;
+    flex: none !important;
   }
 
   /* Desktop Home Layout */
   .desk-home-grid {
     display: grid;
-    grid-template-columns: 1.55fr 1fr;
-    gap: 28px;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 32px;
     align-items: start;
+    width: 100%;
+  }
+  @media (min-width: 1300px) {
+    .desk-home-grid {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 36px;
+    }
   }
   .desk-home-col1,
   .desk-home-col2 {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
     min-width: 0;
+    width: 100%;
+  }
+
+  /* Desktop Horizontal Rail -> Responsive Auto-Fill Grid (No Scroll in between, No Awkward Cuts) */
+  .desk-home-col2 .hs {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)) !important;
+    gap: 12px !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    scroll-snap-type: none !important;
+  }
+  .desk-home-col2 .hs .mini,
+  .desk-home-col2 .hs .cdm,
+  .desk-home-col2 .hs .pincard {
+    width: auto !important;
+    flex: auto !important;
+    min-width: 0 !important;
   }
 
   /* Desktop Calendar Layout */
