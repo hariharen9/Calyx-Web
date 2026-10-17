@@ -11,6 +11,11 @@ import { ACT, SEGH } from "./actions.js";
 export function initEventListeners() {
   /* ================= CLICK DELEGATION ================= */
   document.addEventListener("click", (e) => {
+    if (e.target && e.target.id === "overlays") {
+      if (UI.page) closePage();
+      else if (UI.sheet) closeSheet();
+      return;
+    }
     const seg = e.target.closest("[data-seg]");
     if (seg) {
       const key = seg.dataset.seg,

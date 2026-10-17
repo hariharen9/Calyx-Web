@@ -20,7 +20,7 @@ export function setSettingsRefreshFn(fn) {
   _refreshAllFn = fn;
 }
 
-export function setTheme(t, ev) {
+export function setTheme(t) {
   if (t === S.prefs.theme) return;
   const apply = () => {
     S.prefs.theme = t;
@@ -28,39 +28,13 @@ export function setTheme(t, ev) {
     applyPrefs();
     if (_refreshAllFn) _refreshAllFn();
   };
-  if (document.startViewTransition && !reduced()) {
-    const x = (ev && ev.clientX) || innerWidth / 2,
-      y = (ev && ev.clientY) || innerHeight / 2,
-      r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-    try {
-      const tr = document.startViewTransition(apply);
-      tr.ready
-        .then(() =>
-          document.documentElement.animate(
-            {
-              clipPath: [
-                `circle(0px at ${x}px ${y}px)`,
-                `circle(${r}px at ${x}px ${y}px)`,
-              ],
-            },
-            {
-              duration: 650,
-              easing: "cubic-bezier(.4,0,.2,1)",
-              pseudoElement: "::view-transition-new(root)",
-            },
-          ),
-        )
-        .catch(() => {});
-      return;
-    } catch (e) {}
-  }
   const h = document.documentElement;
   h.classList.add("tx");
   apply();
-  setTimeout(() => h.classList.remove("tx"), 550);
+  setTimeout(() => h.classList.remove("tx"), 450);
 }
 
-export function setMode(m, ev) {
+export function setMode(m) {
   if (m === S.prefs.mode) return;
   const apply = () => {
     S.prefs.mode = m;
@@ -68,36 +42,10 @@ export function setMode(m, ev) {
     applyPrefs();
     if (_refreshAllFn) _refreshAllFn();
   };
-  if (document.startViewTransition && !reduced()) {
-    const x = (ev && ev.clientX) || innerWidth / 2,
-      y = (ev && ev.clientY) || innerHeight / 2,
-      r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-    try {
-      const tr = document.startViewTransition(apply);
-      tr.ready
-        .then(() =>
-          document.documentElement.animate(
-            {
-              clipPath: [
-                `circle(0px at ${x}px ${y}px)`,
-                `circle(${r}px at ${x}px ${y}px)`,
-              ],
-            },
-            {
-              duration: 650,
-              easing: "cubic-bezier(.4,0,.2,1)",
-              pseudoElement: "::view-transition-new(root)",
-            },
-          ),
-        )
-        .catch(() => {});
-      return;
-    } catch (e) {}
-  }
   const h = document.documentElement;
   h.classList.add("tx");
   apply();
-  setTimeout(() => h.classList.remove("tx"), 550);
+  setTimeout(() => h.classList.remove("tx"), 450);
 }
 
 export function settingsHtml() {
