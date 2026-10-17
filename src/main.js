@@ -39,7 +39,7 @@ import { initEventListeners } from "./events/listeners.js";
 setStateRefreshFn(refreshAll);
 setSettingsRefreshFn(refreshAll);
 setCalRenderFn(() => render());
-setAlarmCallbacks({ saveState, refreshAll, fmtT, buzz });
+setAlarmCallbacks({ saveState, refreshAll, fmtT, buzz, getItems: () => S.items, getPrefs: () => S.prefs });
 setComposerOverlayCallbacks({ openSheet, closeSheet, paintSheet, refreshAll });
 setCmdCallbacks({ openPage, openSheet, openItem, openLog, cdSheet, logNow, refreshAll, go, UI });
 setPagesOverlayCallbacks({ openPage, closePage, paintPage, openSheet, closeSheet, renderApp: () => render() });

@@ -2,6 +2,7 @@ import { S, savePrefs, applyPrefs, reduced, buzz } from "../state/state.js";
 import { ic } from "../utils/icons.js";
 import { esc } from "../utils/helpers.js";
 import { segHtml } from "../queries/queries.js";
+import { getMockDataStats } from "../data/seed.js";
 
 /* ================= SETTINGS ================= */
 export const THEMES = [
@@ -117,8 +118,39 @@ export function settingsHtml() {
     String(P.snooze),
     "sm",
   )}</div></div><button class="srow press" style="width:100%" data-act="notifhealth"><div><b>Notification health</b><small>Check exact alarms, battery and permissions</small></div>${ic("chevR", 18)}</button></section>`;
-  h += `<div class="ssec">Cloud Sync (Supabase)</div><section class="card"><div class="srow"><div><b>${S.user ? "Synced with Supabase" : "Offline / Local Only"}</b><small>${S.user ? esc(S.user.email) : "Connect Supabase to sync across devices"}</small></div><button class="addbtn press" data-act="openauth">${S.user ? "Account" : "Connect"}</button></div>${S.user ? '<div class="srow"><div><b>Cloud Sync</b><small>Push local changes to cloud</small></div><button class="addbtn press" data-act="syncnow">Sync now</button></div>' : ""}</section>
-<div class="ssec">Your data</div><section class="card"><div class="srow"><div><b>Backup (.json)</b><small>Export or restore all data</small></div><span style="display:flex;gap:8px"><button class="addbtn press" data-act="exportjson">Export</button><button class="addbtn press" data-act="importjson">Import</button></span></div><div class="srow"><div><b>Calendar file (.ics)</b><small>Works with Apple/Google calendar</small></div><span style="display:flex;gap:8px"><button class="addbtn press" data-act="exportics">Export</button><button class="addbtn press" data-act="importics">Import</button></span></div><div class="srow"><div><b>Demo data</b><small>Reset to fresh sample schedule</small></div><button class="addbtn press" data-act="demo">Load</button></div><div class="srow"><div><b style="color:var(--hi)">Clear all data</b><small>Removes events, tasks, logs and countdowns</small></div><button class="addbtn press" style="color:var(--hi)" data-act="clear">Clear</button></div></section>`;
-  h += `<div class="about"><b class="disp">Calyx</b>Version 1.0 design mock<br>Made without a server. Zero telemetry.<br><button class="addbtn press" style="margin-top:12px" data-act="welcome">Replay welcome</button></div></div>`;
+  h += `<div class="ssec">Cloud Sync (Supabase)</div><section class="card"><div class="srow"><div><b>${S.user ? "Synced with Supabase" : "Offline / Local Only"}</b><small>${S.user ? esc(S.user.email) : "Connect Supabase to sync across devices"}</small></div><button class="addbtn press" data-act="openauth">${S.user ? "Account" : "Connect"}</button></div>${S.user ? '<div class="srow"><div><b>Cloud Sync</b><small>Push local changes to cloud</small></div><button class="addbtn press" data-act="syncnow">Sync now</button></div>' : ""}</section>`;
+
+  const mockStats = getMockDataStats();
+  h += `<div class="ssec">Your data</div><section class="card">
+    <div class="srow">
+      <div><b>Backup (.json)</b><small>Export or restore all data</small></div>
+      <span style="display:flex;gap:8px">
+        <button class="addbtn press" data-act="exportjson">Export</button>
+        <button class="addbtn press" data-act="importjson">Import</button>
+      </span>
+    </div>
+    <div class="srow">
+      <div><b>Calendar file (.ics)</b><small>Works with Apple/Google calendar</small></div>
+      <span style="display:flex;gap:8px">
+        <button class="addbtn press" data-act="exportics">Export</button>
+        <button class="addbtn press" data-act="importics">Import</button>
+      </span>
+    </div>
+    <div class="srow">
+      <div>
+        <b>Sample data</b>
+        <small>${mockStats.total > 0 ? `${mockStats.total} sample entries loaded` : "Starter schedule, notes & habits"}</small>
+      </div>
+      <span style="display:flex;gap:8px">
+        <button class="addbtn press" data-act="loadmock">${mockStats.total > 0 ? "Reload" : "Load"}</button>
+        ${mockStats.total > 0 ? `<button class="addbtn press" data-act="unloadmock" style="color:var(--muted)">Unload</button>` : ""}
+      </span>
+    </div>
+    <div class="srow">
+      <div><b style="color:var(--hi)">Clear all data</b><small>Removes all items, logs, and notes (local & cloud)</small></div>
+      <button class="addbtn press" style="color:var(--hi)" data-act="clear">Clear All</button>
+    </div>
+  </section>`;
+  h += `<div class="about"><b class="disp">Calyx</b>Version 1.0 · Local-first<br>Zero telemetry. Offline ready.<br><button class="addbtn press" style="margin-top:12px" data-act="welcome">Replay welcome</button></div></div>`;
   return h;
 }

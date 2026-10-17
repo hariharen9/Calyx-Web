@@ -140,11 +140,104 @@ export const SLASH = [
 
 export const B = (t, x = "", extra) => ({ id: uid(), t, x, ...(extra || {}) });
 
-export function seedPages() {
-  const f1 = { id: uid(), name: "Work", emoji: "💼", open: true },
-    f2 = { id: uid(), name: "Personal", emoji: "🌿", open: true },
-    f3 = { id: uid(), name: "Learning", emoji: "📚", open: false };
-  S.folders = [f1, f2, f3];
+export const SEED_EVENT_TITLES = new Set([
+  "Team standup",
+  "Piano lesson",
+  "Yoga flow",
+  "1-on-1 with Lead",
+  "Dentist checkup",
+  "Sprint planning",
+  "Dinner with Meera",
+  "Team lunch",
+  "Farmers market",
+  "Quarterly review",
+  "Flight to Delhi",
+  "Meera's birthday",
+  "Pick up Meera's gift",
+  "Call insurance about the claim",
+  "Water the plants",
+  "Return Amazon package",
+  "Pay electric bill",
+  "Review PR #42 & merge feature branch",
+  "Submit quarterly budget proposal",
+  "Order new mechanical keyboard switches",
+  "Reply to landlord about renewal",
+  "Renew domain registration",
+  "Call mom",
+  "Plan Q4 roadmap",
+  "Book Goa flights",
+  "Back up phone photos",
+  "Read chapter 7 of the DDIA book",
+]);
+
+export const SEED_LOG_NAMES = new Set([
+  "Haircut",
+  "Car wash",
+  "Gym workout",
+  "Water filter",
+  "Petrol",
+  "Water plants",
+]);
+
+export const SEED_CD_TITLES = new Set([
+  "Product launch",
+  "Diwali",
+  "Mom's birthday",
+  "Goa trip",
+  "New Year",
+]);
+
+export const SEED_PAGE_TITLES = new Set([
+  "Welcome to Pages",
+  "Q4 roadmap",
+  "1-on-1 notes",
+  "Goa trip plan",
+  "Home maintenance",
+  "Reading list",
+  "Scratchpad",
+]);
+
+export const SEED_FOLDER_NAMES = new Set(["Work", "Personal", "Learning"]);
+
+export const isMockItem = (i) => Boolean(i && (i.mock || SEED_EVENT_TITLES.has(i.title)));
+export const isMockLog = (l) => Boolean(l && (l.mock || SEED_LOG_NAMES.has(l.name)));
+export const isMockCd = (c) => Boolean(c && (c.mock || SEED_CD_TITLES.has(c.title)));
+export const isMockPage = (p) => Boolean(p && (p.mock || SEED_PAGE_TITLES.has(p.title)));
+export const isMockFolder = (f) => Boolean(f && (f.mock || SEED_FOLDER_NAMES.has(f.name)));
+
+export function getMockDataStats() {
+  const items = (S.items || []).filter(isMockItem).length;
+  const logs = (S.logs || []).filter(isMockLog).length;
+  const cds = (S.cds || []).filter(isMockCd).length;
+  const pages = (S.pages || []).filter(isMockPage).length;
+  const folders = (S.folders || []).filter(isMockFolder).length;
+  const total = items + logs + cds + pages + folders;
+  return { items, logs, cds, pages, folders, total };
+}
+
+export function unloadMockData() {
+  const removedMockFolders = (S.folders || []).filter(isMockFolder).map((f) => f.id);
+
+  S.items = (S.items || []).filter((i) => !isMockItem(i));
+  S.logs = (S.logs || []).filter((l) => !isMockLog(l));
+  S.cds = (S.cds || []).filter((c) => !isMockCd(c));
+  S.pages = (S.pages || []).filter((p) => !isMockPage(p));
+  S.folders = (S.folders || []).filter((f) => !isMockFolder(f));
+
+  if (S.pages) {
+    S.pages.forEach((p) => {
+      if (p.folder && removedMockFolders.includes(p.folder)) {
+        p.folder = null;
+      }
+    });
+  }
+}
+
+export function getSeedPages() {
+  const f1 = { id: uid(), name: "Work", emoji: "💼", open: true, mock: true },
+    f2 = { id: uid(), name: "Personal", emoji: "🌿", open: true, mock: true },
+    f3 = { id: uid(), name: "Learning", emoji: "📚", open: false, mock: true };
+  const mockFolders = [f1, f2, f3];
   const P = (title, icon, f, updated, blocks, x) => ({
     id: uid(),
     title,
@@ -153,9 +246,10 @@ export function seedPages() {
     updated,
     blocks,
     fav: false,
+    mock: true,
     ...x,
   });
-  S.pages = [
+  const mockPages = [
     P(
       "Welcome to Pages",
       "✨",
@@ -267,42 +361,56 @@ export function seedPages() {
       B("ul", "Call mom after the Diwali shopping"),
     ]),
   ];
+  return { mockFolders, mockPages };
 }
 
-export function seedAll() {
-  const t = todayKey();
-  S.items = [
+export function seedPages() {
+  const { mockFolders, mockPages } = getSeedPages();
+  S.folders = mockFolders;
+  S.pages = mockPages;
+}
+
+export function getSeedItems(t) {
+  return [
     ev("Team standup", addKey(t, -2), "09:30", "09:45", 3, {
       repeat: REP.weekdays,
       loc: "Huddle room 2",
+      mock: true,
     }),
     ev("Piano lesson", addKey(t, -3), "17:00", "18:00", 4, {
       repeat: REP.weekly,
       loc: "Studio Gamut",
+      mock: true,
     }),
     ev("Yoga flow", addKey(t, 2), "12:00", "13:00", 2, {
       repeat: REP.weekly,
       loc: "Cult, Koramangala",
+      mock: true,
     }),
     ev("1-on-1 with Lead", addKey(t, 1), "14:00", "14:45", 1, {
       repeat: REP.weekly,
       notes: "Bring Q4 hiring plan and roadmap draft.",
+      mock: true,
     }),
     ev("Dentist checkup", t, "13:00", "14:00", 2, {
       loc: "Dr. Rao's clinic",
       notes: "Cleaning plus a quick x-ray.",
+      mock: true,
     }),
-    ev("Sprint planning", t, "16:30", "17:30", 5, { loc: "Meet, 4th floor" }),
+    ev("Sprint planning", t, "16:30", "17:30", 5, { loc: "Meet, 4th floor", mock: true }),
     ev("Dinner with Meera", t, "19:30", "21:00", 4, {
       loc: "Toit, Indiranagar",
+      mock: true,
     }),
-    ev("Team lunch", addKey(t, 2), "13:00", "14:00", 2, { loc: "Truffles" }),
-    ev("Farmers market", addKey(t, 3), "09:00", "10:30", 2),
+    ev("Team lunch", addKey(t, 2), "13:00", "14:00", 2, { loc: "Truffles", mock: true }),
+    ev("Farmers market", addKey(t, 3), "09:00", "10:30", 2, { mock: true }),
     ev("Quarterly review", addKey(t, 6), "11:00", "12:30", 1, {
       loc: "Boardroom",
+      mock: true,
     }),
     ev("Flight to Delhi", addKey(t, 14), "06:15", "09:00", 1, {
       notes: "Terminal 1, gate opens 05:30.",
+      mock: true,
     }),
     {
       id: uid(),
@@ -312,6 +420,7 @@ export function seedAll() {
       allDay: true,
       k: 4,
       repeat: REP.yearly,
+      mock: true,
     },
     {
       id: uid(),
@@ -320,6 +429,7 @@ export function seedAll() {
       date: t,
       start: "18:00",
       k: 4,
+      mock: true,
     },
     {
       id: uid(),
@@ -328,6 +438,7 @@ export function seedAll() {
       date: addKey(t, 1),
       start: "10:00",
       k: 3,
+      mock: true,
     },
     {
       id: uid(),
@@ -337,33 +448,38 @@ export function seedAll() {
       start: "08:00",
       k: 2,
       repeat: REP.weekly,
+      mock: true,
     },
-    tk("Return Amazon package", addKey(t, -1), "low", { done: true }),
-    tk("Pay electric bill", t, "med"),
+    tk("Return Amazon package", addKey(t, -1), "low", { done: true, mock: true }),
+    tk("Pay electric bill", t, "med", { mock: true }),
     tk("Review PR #42 & merge feature branch", t, "high", {
       subs: [
         { t: "Read the diff", d: true },
         { t: "Run the test suite", d: true },
         { t: "Merge to main", d: false },
       ],
+      mock: true,
     }),
-    tk("Submit quarterly budget proposal", t, "high", { done: true }),
-    tk("Order new mechanical keyboard switches", addKey(t, 1), "low"),
-    tk("Reply to landlord about renewal", addKey(t, 1), "med"),
-    tk("Renew domain registration", addKey(t, 2), "med"),
-    tk("Call mom", addKey(t, 4), "med"),
+    tk("Submit quarterly budget proposal", t, "high", { done: true, mock: true }),
+    tk("Order new mechanical keyboard switches", addKey(t, 1), "low", { mock: true }),
+    tk("Reply to landlord about renewal", addKey(t, 1), "med", { mock: true }),
+    tk("Renew domain registration", addKey(t, 2), "med", { mock: true }),
+    tk("Call mom", addKey(t, 4), "med", { mock: true }),
     tk("Plan Q4 roadmap", addKey(t, 6), "high", {
       subs: [
         { t: "Collect team input", d: false },
         { t: "Draft themes", d: false },
         { t: "Review with Lead", d: false },
       ],
+      mock: true,
     }),
-    tk("Book Goa flights", null, "med"),
-    tk("Back up phone photos", null, "low"),
-    tk("Read chapter 7 of the DDIA book", null, "low"),
+    tk("Book Goa flights", null, "med", { mock: true }),
+    tk("Back up phone photos", null, "low", { mock: true }),
+    tk("Read chapter 7 of the DDIA book", null, "low", { mock: true }),
   ];
+}
 
+export function getSeedLogs(t) {
   const mkOcc = (last, gaps, cost, notes) => {
     let d = last;
     const o = [{ d, cost, note: notes[0] }];
@@ -374,13 +490,14 @@ export function seedAll() {
     return o;
   };
 
-  S.logs = [
+  return [
     {
       id: uid(),
       name: "Haircut",
       icon: "scissors",
       target: 28,
       k: 4,
+      mock: true,
       occ: mkOcc(addKey(t, -27), [27, 28, 27, 28, 27], 35, [
         "Salon cut & trim",
       ]),
@@ -391,6 +508,7 @@ export function seedAll() {
       icon: "car",
       target: 14,
       k: 1,
+      mock: true,
       occ: mkOcc(addKey(t, -13), [12, 14, 13, 15], 12, [
         "Full exterior wash",
         "Wash + vacuum",
@@ -402,6 +520,7 @@ export function seedAll() {
       icon: "dumbbell",
       target: 2,
       k: 5,
+      mock: true,
       occ: mkOcc(addKey(t, -2), [2, 3, 2, 1, 2, 3, 2], 0, [
         "Push day",
         "Pull day",
@@ -415,6 +534,7 @@ export function seedAll() {
       icon: "drop",
       target: 60,
       k: 2,
+      mock: true,
       occ: mkOcc(addKey(t, -58), [60, 57, 59], 18, ["Replaced cartridge"]),
     },
     {
@@ -423,6 +543,7 @@ export function seedAll() {
       icon: "fuel",
       target: 9,
       k: 3,
+      mock: true,
       occ: mkOcc(addKey(t, -8), [8, 9, 7, 10], 42, ["Full tank"]),
     },
     {
@@ -431,17 +552,21 @@ export function seedAll() {
       icon: "leaf",
       target: 3,
       k: 2,
+      mock: true,
       occ: mkOcc(addKey(t, -3), [3, 4, 3, 3], 0, ["All plants"]),
     },
   ];
+}
 
-  S.cds = [
+export function getSeedCds(t) {
+  return [
     {
       id: uid(),
       title: "Product launch",
       date: addKey(t, 18),
       emoji: "🚀",
       created: addKey(t, -30),
+      mock: true,
     },
     {
       id: uid(),
@@ -449,6 +574,7 @@ export function seedAll() {
       date: addKey(t, 25),
       emoji: "🪔",
       created: addKey(t, -45),
+      mock: true,
     },
     {
       id: uid(),
@@ -456,6 +582,7 @@ export function seedAll() {
       date: addKey(t, 48),
       emoji: "🎂",
       created: addKey(t, -14),
+      mock: true,
     },
     {
       id: uid(),
@@ -463,6 +590,7 @@ export function seedAll() {
       date: addKey(t, 65),
       emoji: "🏖️",
       created: addKey(t, -60),
+      mock: true,
     },
     {
       id: uid(),
@@ -470,8 +598,31 @@ export function seedAll() {
       date: String(pd(t).getFullYear() + 1) + "-01-01",
       emoji: "🎆",
       created: addKey(t, -15),
+      mock: true,
     },
   ];
+}
 
-  seedPages();
+export function loadMockData() {
+  unloadMockData();
+  const t = todayKey();
+  const items = getSeedItems(t);
+  const logs = getSeedLogs(t);
+  const cds = getSeedCds(t);
+  const { mockFolders, mockPages } = getSeedPages();
+
+  S.items.push(...items);
+  S.logs.push(...logs);
+  S.cds.push(...cds);
+  S.folders.push(...mockFolders);
+  S.pages.push(...mockPages);
+}
+
+export function seedAll() {
+  S.items = [];
+  S.logs = [];
+  S.cds = [];
+  S.folders = [];
+  S.pages = [];
+  loadMockData();
 }

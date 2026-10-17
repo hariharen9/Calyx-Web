@@ -61,11 +61,19 @@
   width: 118px;
   height: 118px;
 }
-.ring svg {
+.ring-svg,
+.ring > svg:first-child {
   width: 100%;
   height: 100%;
-  transform: rotate(-90deg);
+  transform: rotate(-90deg) !important;
   filter: var(--ringfx);
+}
+.ring .rt svg,
+.ring .rt .ic {
+  transform: none !important;
+  width: 34px !important;
+  height: 34px !important;
+  filter: none !important;
 }
 .ring circle {
   fill: none;

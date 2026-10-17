@@ -87,10 +87,14 @@
   display: grid;
   place-items: center;
 }
-.pr svg {
+.pr > svg:not(.ic) {
   position: absolute;
   inset: 0;
   transform: rotate(-90deg);
+}
+.pr > svg.ic {
+  position: relative;
+  transform: none;
 }
 .pr circle {
   fill: none;

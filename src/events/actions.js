@@ -4,7 +4,7 @@ import { $, $$, esc, todayKey, pd, ymd, addKey, uid } from "../utils/helpers.js"
 import { ic } from "../utils/icons.js";
 import { toast, getToastUndo, clearToastUndo } from "../utils/toast.js";
 import { playChime, requestNotificationPermission, sendNotification } from "../utils/audio.js";
-import { repKey, seedAll, tk, B } from "../data/seed.js";
+import { repKey, seedAll, tk, B, loadMockData, unloadMockData, getMockDataStats } from "../data/seed.js";
 import { parseNL } from "../nlp/nlp.js";
 import { UI, openSheet, closeSheet, paintSheet, openPage, closePage, paintPage, render, refreshAll, openItem, openLog, cdSheet, backdateSheet, authSheetHtml, showWelcome, ripple, logNow } from "../components/overlays.js";
 import { C, openComposer, saveComposer, fillTimes } from "../components/composer.js";
@@ -595,22 +595,81 @@ export const ACT = {
   importics() {
     triggerImportIcs();
   },
-  demo() {
-    seedAll();
-    toast("Demo schedule loaded");
+  async loadmock() {
+    loadMockData();
+    saveState();
     refreshAll();
+    paintPage();
+    buzz(16);
+    if (S.user) {
+      toast("Mock data loaded & syncing with cloud...");
+      try {
+        const res = await pushStateToCloud(S);
+        if (res.synced) {
+          toast("Mock data loaded & synced to cloud!");
+        } else {
+          toast(`Loaded locally. Cloud warning: ${res.error || res.reason}`);
+        }
+      } catch (e) {
+        toast("Loaded locally");
+      }
+    } else {
+      toast("Sample schedule & notes loaded");
+    }
+    paintPage();
   },
-  clear() {
+  async unloadmock() {
+    const stats = getMockDataStats();
+    if (stats.total === 0) {
+      toast("No mock data found to unload");
+      return;
+    }
+    unloadMockData();
+    saveState();
+    refreshAll();
+    paintPage();
+    buzz([14, 30, 14]);
+    if (S.user) {
+      toast(`Unloading ${stats.total} mock items & syncing with cloud...`);
+      try {
+        const res = await pushStateToCloud(S);
+        if (res.synced) {
+          toast(`Unloaded ${stats.total} mock items (cleared from cloud sync)`);
+        } else {
+          toast(`Unloaded locally. Cloud warning: ${res.error || res.reason}`);
+        }
+      } catch (e) {
+        toast(`Unloaded ${stats.total} mock items locally`);
+      }
+    } else {
+      toast(`Unloaded ${stats.total} mock items from device`);
+    }
+    paintPage();
+  },
+  demo() {
+    this.loadmock();
+  },
+  async clear() {
     const a = [S.items, S.logs, S.cds, S.pages, S.folders];
     S.items = [];
     S.logs = [];
     S.cds = [];
     S.pages = [];
     S.folders = [];
-    toast("Everything cleared", () => {
-      [S.items, S.logs, S.cds, S.pages, S.folders] = a;
-    });
+    saveState();
     refreshAll();
+    paintPage();
+    buzz(24);
+    if (S.user) {
+      pushStateToCloud(S).catch(() => {});
+    }
+    toast("Everything cleared & cloud synced", () => {
+      [S.items, S.logs, S.cds, S.pages, S.folders] = a;
+      saveState();
+      refreshAll();
+      paintPage();
+      if (S.user) pushStateToCloud(S).catch(() => {});
+    });
   },
   welcome() {
     closePage();

@@ -199,7 +199,7 @@ export const RC = 276.46;
 
 export function ringHtml(frac, main, small) {
   const off = (RC * (1 - clamp(frac, 0, 1))).toFixed(1);
-  return `<div class="ring"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="hring" cx="50" cy="50" r="44" stroke-dashoffset="${off}"/></svg><div class="rt"><b class="disp" id="htime">${main}</b><small id="hrel">${small}</small></div></div>`;
+  return `<div class="ring"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="hring" cx="50" cy="50" r="44" stroke-dashoffset="${off}"/></svg><div class="rt"><b class="disp" id="htime">${main}</b><small id="hrel">${small}</small></div></div>`;
 }
 
 export function nextOcc(it) {

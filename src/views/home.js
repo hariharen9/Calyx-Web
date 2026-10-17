@@ -25,7 +25,7 @@ export function heroHtml(cur, next, k) {
       until = s - nm;
     return `<button class="hero press ${stg(2)}" data-act="open" data-id="${next.id}" data-date="${k}" data-hero="next" data-s="${s}"><div><div class="hl"><span class="live-dot"></span>Up next</div><h2 class="disp">${esc(next.title)}</h2><div class="hl2">${fmtT(next.start)} – ${fmtT(endOf(next))}${next.loc ? " · " + esc(next.loc) : ""}</div><div class="hnext">Starts <b id="hrel">${relIn(until)}</b></div></div>${ringHtml(until / 180, fmtLeft(until * 60), "to start")}</button>`;
   }
-  return `<div class="hero ${stg(2)}"><div><div class="hl">Today</div><h2 class="disp">You're all clear</h2><div class="hl2">Nothing left on the calendar. Enjoy the evening.</div></div><div class="ring"><svg viewBox="0 0 100 100"><circle class="trk" cx="50" cy="50" r="44"/><circle class="prg" cx="50" cy="50" r="44" stroke-dasharray="${RC}" stroke-dashoffset="0"/></svg><div class="rt" style="color:var(--hero-ring)">${ic("check", 34)}</div></div></div>`;
+  return `<div class="hero ${stg(2)}"><div><div class="hl">Today</div><h2 class="disp">You're all clear</h2><div class="hl2">Nothing left on the calendar. Enjoy the evening.</div></div><div class="ring"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="trk" cx="50" cy="50" r="44"/><circle class="prg" cx="50" cy="50" r="44" stroke-dasharray="${RC}" stroke-dashoffset="0"/></svg><div class="rt" style="color:var(--hero-ring)">${ic("check", 34)}</div></div></div>`;
 }
 
 export function vHome() {
