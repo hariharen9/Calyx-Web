@@ -263,7 +263,7 @@
   position: absolute;
   left: 12px;
   right: 12px;
-  bottom: 92px;
+  bottom: calc(92px + env(safe-area-inset-bottom, 0px));
   z-index: 19;
   display: flex;
   gap: 8px;

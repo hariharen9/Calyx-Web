@@ -303,7 +303,7 @@
   border-radius: calc(var(--r-lg) + 6px) calc(var(--r-lg) + 6px) 0 0;
   transform: translateY(105%);
   transition: transform 0.55s var(--ease);
-  padding: 0 20px 24px;
+  padding: 0 20px calc(24px + env(safe-area-inset-bottom, 0px));
   scrollbar-width: none;
 }
 .sheet::-webkit-scrollbar {

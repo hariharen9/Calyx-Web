@@ -184,7 +184,7 @@
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: 96px;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   z-index: 70;
   display: flex;
   align-items: center;
@@ -206,7 +206,7 @@
   border-radius: 0;
 }
 #main.tq .toast {
-  bottom: 152px;
+  bottom: calc(152px + env(safe-area-inset-bottom, 0px));
 }
 .toast.show {
   transform: none;

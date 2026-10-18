@@ -23,8 +23,14 @@ textarea {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+html {
+  height: 100%;
+  height: -webkit-fill-available;
+}
 body {
   height: 100%;
+  height: -webkit-fill-available;
+  height: 100dvh;
   background: var(--stage);
   color: var(--text);
   font-family: var(--font-body);
@@ -53,7 +59,11 @@ body {
 .shell {
   display: flex;
   width: 100vw;
+  width: 100%;
+  height: 100%;
   height: 100vh;
+  height: -webkit-fill-available;
+  height: 100dvh;
   overflow: hidden;
   background: var(--bg);
 }
@@ -177,7 +187,7 @@ body {
   inset: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 8px 16px 172px;
+  padding: 8px 16px calc(172px + env(safe-area-inset-bottom, 0px));
   scrollbar-width: none;
   overscroll-behavior: contain;
 }

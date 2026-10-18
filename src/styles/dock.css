@@ -3,7 +3,7 @@
   position: absolute;
   left: 12px;
   right: 12px;
-  bottom: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
   display: flex;
   gap: 10px;
   z-index: 20;
