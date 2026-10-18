@@ -12,6 +12,7 @@ import { vTasks } from "../views/tasks.js";
 import { vTrack } from "../views/track.js";
 import { vPages, PG, curPage, autosizeAll } from "../views/pages.js";
 import { THEMES } from "../views/settings.js";
+import { authModalHtml } from "./auth-modal.js";
 
 /* ================= OVERLAYS ================= */
 export const UI = { sheet: null, page: null, cmd: null };
@@ -339,61 +340,5 @@ export function backdateSheet(id) {
 }
 
 export function authSheetHtml() {
-  const sb = getSupabase();
-  const cfg = getSupabaseConfig();
-  if (!sb) {
-    return (
-      '<div class="shead"><div><h2 class="disp">Connect Supabase</h2><small>Enter your Supabase project keys to enable cloud sync</small></div></div>' +
-      fld(
-        "Supabase Project URL",
-        '<input class="inp" id="sb-url" placeholder="https://xyzcompany.supabase.co" value="' +
-          esc(cfg.url) +
-          '">',
-      ) +
-      fld(
-        "Supabase Anon Key",
-        '<input class="inp" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." value="' +
-          esc(cfg.anonKey) +
-          '">',
-      ) +
-      '<div class="sgroup" style="margin-top:12px"><button class="btn press" data-act="savesbcfg">' +
-      ic("check", 20) +
-      "Save and Connect</button></div>" +
-      '<div style="font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5">Tip: You can also specify <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> in a <code>.env</code> file.</div>'
-    );
-  }
-
-  if (S.user) {
-    return (
-      '<div class="shead"><div><h2 class="disp">Account</h2><small>Signed in as ' +
-      esc(S.user.email) +
-      "</small></div></div>" +
-      '<section class="card dl" style="margin-bottom:14px"><div class="mrow"><span>User Email</span><b class="num">' +
-      esc(S.user.email) +
-      '</b></div><div class="mrow"><span>Status</span><span style="color:var(--accent);font-weight:700">Connected</span></div></section>' +
-      '<div class="sgroup"><button class="btn press" data-act="syncnow">' +
-      ic("spark", 18) +
-      'Sync Now</button><button class="btn dng press" data-act="signout">' +
-      ic("x", 18) +
-      "Sign Out</button></div>"
-    );
-  }
-
-  return (
-    '<div class="shead"><div><h2 class="disp">Cloud Sync</h2><small>Sign in to sync your data across devices</small></div></div>' +
-    fld(
-      "Email",
-      '<input class="inp" type="email" id="auth-email" placeholder="you@domain.com" autocomplete="email">',
-    ) +
-    fld(
-      "Password",
-      '<input class="inp" type="password" id="auth-pass" placeholder="••••••••" autocomplete="current-password">',
-    ) +
-    '<div class="sgroup" style="margin-top:12px"><button class="btn press" data-act="signin">' +
-    ic("check", 20) +
-    'Sign In</button><button class="btn sec press" data-act="signup">Create Account</button></div>' +
-    '<div class="sgroup" style="margin-top:12px"><button class="btn sec sm press" data-act="editsbcfg">' +
-    ic("settings", 16) +
-    "Change Project Keys</button></div>"
-  );
+  return authModalHtml();
 }

@@ -8,6 +8,7 @@ import { tryMath, parseNL, createFromParse } from "../nlp/nlp.js";
 import { snip, newPage, openPageEditor } from "../views/pages.js";
 import { openComposer } from "./composer.js";
 import { settingsHtml } from "../views/settings.js";
+import { openAuthModal } from "./auth-modal.js";
 
 export const CMD = { acts: [], sel: 0, key: "", prev: new Set(), math: null };
 
@@ -128,6 +129,17 @@ export function cmdActions(q) {
         run: () => {
           closeCmd();
           if (_openPage) _openPage(settingsHtml);
+        },
+      },
+      {
+        key: "q-sync",
+        sec: "Go to",
+        icon: "spark",
+        title: S.user ? `Cloud Sync (${S.user.email})` : "Cloud Sync & Account",
+        sub: S.user ? "Sync now or manage account" : "Connect or sign in to Supabase",
+        run: () => {
+          closeCmd();
+          openAuthModal();
         },
       },
     );

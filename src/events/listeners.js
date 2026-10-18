@@ -127,6 +127,22 @@ export function initEventListeners() {
       if (e.target.id === "qain-desk") ACT["qaadd-desk"]();
       else quickAdd();
     }
+    if (
+      (e.target.id === "auth-pass" || e.target.id === "auth-confirm-pass" || e.target.id === "auth-email") &&
+      e.key === "Enter"
+    ) {
+      e.preventDefault();
+      const submitBtn = $("#auth-submit-btn");
+      if (submitBtn && submitBtn.dataset.act) {
+        ACT[submitBtn.dataset.act]();
+      } else {
+        ACT["auth-signin"]();
+      }
+    }
+    if ((e.target.id === "sb-url" || e.target.id === "sb-key") && e.key === "Enter") {
+      e.preventDefault();
+      ACT["auth-savecfg"]();
+    }
     if (e.target.id === "subin" && e.key === "Enter") {
       const v = e.target.value.trim();
       if (v) {

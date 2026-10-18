@@ -12,6 +12,20 @@ import { CMD, openCmd, closeCmd, paintCmd, quickAdd } from "../components/comman
 import { dayList, shiftMonth, slideWeek } from "../views/calendar.js";
 import { settingsHtml, setTheme, setMode } from "../views/settings.js";
 import { PG, FS, setFS, curPage, touchPage, autosize, updWc, renderBlocks, openPageEditor, newPage, pickSlash, blocksToMd, pageMenuHtml, moveHtml, emojiHtml, folderSheetHtml, turnHtml } from "../views/pages.js";
+import {
+  openAuthModal,
+  setAuthMode,
+  doSignIn,
+  doSignUp,
+  doForgotPass,
+  doSaveConfig,
+  doTestConnection,
+  doUseOffline,
+  doResetConfig,
+  doSignOut,
+  doSyncNow,
+  togglePasswordVisibility,
+} from "../components/auth-modal.js";
 
 /* ================= NAVIGATION ================= */
 export function go(t, force) {
@@ -519,78 +533,61 @@ export const ACT = {
       }
     }
   },
-  openauth() {
-    openSheet(authSheetHtml);
+  openauth(el) {
+    const initialMode = el?.dataset?.mode;
+    openAuthModal(initialMode);
+  },
+  "auth-tab"(el) {
+    const mode = el?.dataset?.mode || "signin";
+    setAuthMode(mode);
+  },
+  "auth-signin"() {
+    doSignIn();
+  },
+  "auth-signup"() {
+    doSignUp();
+  },
+  "auth-forgot"() {
+    doForgotPass();
+  },
+  "auth-testcfg"() {
+    doTestConnection();
+  },
+  "auth-savecfg"() {
+    doSaveConfig();
+  },
+  "auth-resetcfg"() {
+    doResetConfig();
+  },
+  "auth-offline"() {
+    doUseOffline();
+  },
+  "auth-signout"() {
+    doSignOut();
+  },
+  "auth-syncnow"() {
+    doSyncNow();
+  },
+  "auth-togglepass"() {
+    togglePasswordVisibility();
   },
   editsbcfg() {
-    openSheet(authSheetHtml);
+    openAuthModal("config");
   },
-  async savesbcfg() {
-    const url = ($("#sb-url") ? $("#sb-url").value : "").trim();
-    const key = ($("#sb-key") ? $("#sb-key").value : "").trim();
-    if (!url || !key) {
-      toast("Please enter both Supabase URL and Anon key");
-      return;
-    }
-    saveSupabaseConfig(url, key);
-    closeSheet();
-    toast("Supabase connected!");
-    paintPage();
+  savesbcfg() {
+    doSaveConfig();
   },
-  async signin() {
-    const email = ($("#auth-email") ? $("#auth-email").value : "").trim();
-    const password = ($("#auth-pass") ? $("#auth-pass").value : "").trim();
-    if (!email || !password) return toast("Please enter email and password");
-    try {
-      const { user } = await signInWithEmail(email, password);
-      S.user = user;
-      closeSheet();
-      toast("Signed in as " + user.email);
-      const cloudData = await pullStateFromCloud();
-      if (cloudData) {
-        if (cloudData.items) S.items = cloudData.items;
-        if (cloudData.logs) S.logs = cloudData.logs;
-        if (cloudData.cds) S.cds = cloudData.cds;
-        if (cloudData.pages) S.pages = cloudData.pages;
-        if (cloudData.folders) S.folders = cloudData.folders;
-        saveState();
-        refreshAll();
-      }
-      paintPage();
-    } catch (err) {
-      toast(err.message || "Failed to sign in");
-    }
+  signin() {
+    doSignIn();
   },
-  async signup() {
-    const email = ($("#auth-email") ? $("#auth-email").value : "").trim();
-    const password = ($("#auth-pass") ? $("#auth-pass").value : "").trim();
-    if (!email || !password) return toast("Please enter email and password");
-    try {
-      const { user } = await signUpWithEmail(email, password);
-      S.user = user;
-      closeSheet();
-      toast("Account created!");
-      pushStateToCloud(S).catch(() => {});
-      paintPage();
-    } catch (err) {
-      toast(err.message || "Failed to sign up");
-    }
+  signup() {
+    doSignUp();
   },
-  async signout() {
-    await signOutUser();
-    S.user = null;
-    closeSheet();
-    toast("Signed out");
-    paintPage();
+  signout() {
+    doSignOut();
   },
-  async syncnow() {
-    toast("Syncing with Supabase...");
-    const res = await pushStateToCloud(S);
-    if (res.synced) {
-      toast("Synced to cloud successfully!");
-    } else {
-      toast("Sync failed: " + (res.error || res.reason));
-    }
+  syncnow() {
+    doSyncNow();
   },
   exportjson() {
     exportJsonBackup();

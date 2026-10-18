@@ -3,6 +3,7 @@ import { ic } from "../utils/icons.js";
 import { esc } from "../utils/helpers.js";
 import { segHtml } from "../queries/queries.js";
 import { getMockDataStats } from "../data/seed.js";
+import { getSupabaseConfig } from "../supabase.js";
 
 /* ================= SETTINGS ================= */
 export const THEMES = [
@@ -115,7 +116,20 @@ export function settingsHtml() {
     String(P.snooze),
     "sm",
   )}</div></div><button class="srow press" style="width:100%" data-act="notifhealth"><div><b>Notification health</b><small>Check exact alarms, battery and permissions</small></div>${ic("chevR", 18)}</button></section>`;
-  h += `<div class="ssec">Cloud Sync (Supabase)</div><section class="card"><div class="srow"><div><b>${S.user ? "Synced with Supabase" : "Offline / Local Only"}</b><small>${S.user ? esc(S.user.email) : "Connect Supabase to sync across devices"}</small></div><button class="addbtn press" data-act="openauth">${S.user ? "Account" : "Connect"}</button></div>${S.user ? '<div class="srow"><div><b>Cloud Sync</b><small>Push local changes to cloud</small></div><button class="addbtn press" data-act="syncnow">Sync now</button></div>' : ""}</section>`;
+  const cfg = getSupabaseConfig();
+  const syncLabel = S.user
+    ? "Synced with Supabase"
+    : cfg.isConfigured
+      ? "Cloud Ready (Configured)"
+      : "Offline / Local Only";
+  const syncSub = S.user
+    ? esc(S.user.email)
+    : cfg.isConfigured
+      ? "Sign in to synchronize across devices"
+      : "Connect your Supabase project keys to enable cloud sync";
+  const syncBtnText = S.user ? "Account" : cfg.isConfigured ? "Sign In" : "Connect";
+
+  h += `<div class="ssec">Cloud Sync (Supabase)</div><section class="card"><div class="srow"><div><b>${syncLabel}</b><small>${syncSub}</small></div><button class="addbtn press" data-act="openauth">${syncBtnText}</button></div>${S.user ? '<div class="srow"><div><b>Cloud Sync</b><small>Push local changes to cloud</small></div><button class="addbtn press" data-act="syncnow">Sync now</button></div>' : ""}</section>`;
 
   const mockStats = getMockDataStats();
   h += `<div class="ssec">Your data</div><section class="card">

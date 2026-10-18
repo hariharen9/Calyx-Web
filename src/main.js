@@ -2,6 +2,7 @@ import {
   getCurrentUser,
   pullStateFromCloud,
   subscribeToStateChanges,
+  onAuthStateChange,
 } from "./supabase.js";
 import { S, loadPrefs, savePrefs, applyPrefs, loadState, saveState, updateSyncStatus, setStateRefreshFn, DATA_KEY, buzz } from "./state/state.js";
 import { setAlarmCallbacks, checkAlarms } from "./utils/audio.js";
@@ -223,6 +224,16 @@ export function init() {
     });
   }
 
+  // Listen to live Supabase auth state transitions
+  onAuthStateChange((event, user) => {
+    S.user = user;
+    updateSyncStatus();
+    updateDeskBadges();
+    if (user) {
+      setupRealtimeSync();
+    }
+  });
+
   getCurrentUser()
     .then((user) => {
       if (user) {
@@ -246,7 +257,9 @@ export function init() {
         updateSyncStatus();
       }
     })
-    .catch(() => {});
+    .catch(() => {
+      updateSyncStatus();
+    });
 }
 
 init();

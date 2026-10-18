@@ -4,6 +4,7 @@
 @import "./src/styles/components/segments.css";
 @import "./src/styles/components/overlays.css";
 @import "./src/styles/components/command-bar.css";
+@import "./src/styles/components/auth.css";
 @import "./src/styles/views/home.css";
 @import "./src/styles/views/tasks.css";
 @import "./src/styles/views/calendar.css";
