@@ -403,20 +403,13 @@ export function authModalHtml() {
     statusBadge = `<span class="auth-status-badge offline"><i class="dot"></i> Local Only</span>`;
   }
 
-  // Navigation tab bar
+  // Navigation tab bar: clean, user-friendly Sign In / Create Account
   let tabBar = "";
-  if (!S.user && mode !== "confirm") {
+  if (!S.user && (mode === "signin" || mode === "signup")) {
     tabBar = `
       <div class="auth-tabs">
         <button class="auth-tab ${mode === "signin" ? "on" : ""}" data-act="auth-tab" data-mode="signin">Sign In</button>
         <button class="auth-tab ${mode === "signup" ? "on" : ""}" data-act="auth-tab" data-mode="signup">Create Account</button>
-        <button class="auth-tab ${mode === "config" ? "on" : ""}" data-act="auth-tab" data-mode="config">${ic("settings", 14)} Project</button>
-      </div>`;
-  } else if (S.user) {
-    tabBar = `
-      <div class="auth-tabs">
-        <button class="auth-tab ${mode === "account" ? "on" : ""}" data-act="auth-tab" data-mode="account">My Account</button>
-        <button class="auth-tab ${mode === "config" ? "on" : ""}" data-act="auth-tab" data-mode="config">${ic("settings", 14)} Project Keys</button>
       </div>`;
   }
 
@@ -450,7 +443,7 @@ export function authModalHtml() {
         </div>
 
         <div class="auth-actions">
-          <button type="button" class="btn press ${AUTH_MODAL.loading ? "loading" : ""}" data-act="auth-signin" id="auth-submit-btn">
+          <button type="button" class="btn auth-submit-btn press ${AUTH_MODAL.loading ? "loading" : ""}" data-act="auth-signin" id="auth-submit-btn">
             ${AUTH_MODAL.loading ? `<span class="auth-spinner"></span> Signing in...` : `${ic("check", 18)} Sign In`}
           </button>
         </div>
@@ -492,7 +485,7 @@ export function authModalHtml() {
         </div>
 
         <div class="auth-actions">
-          <button type="button" class="btn press ${AUTH_MODAL.loading ? "loading" : ""}" data-act="auth-signup" id="auth-submit-btn">
+          <button type="button" class="btn auth-submit-btn press ${AUTH_MODAL.loading ? "loading" : ""}" data-act="auth-signup" id="auth-submit-btn">
             ${AUTH_MODAL.loading ? `<span class="auth-spinner"></span> Creating account...` : `${ic("plus", 18)} Create Account`}
           </button>
         </div>
@@ -508,7 +501,7 @@ export function authModalHtml() {
         <h3 class="disp">Check Your Email</h3>
         <p>A confirmation email was sent to <b>${esc(AUTH_MODAL.email)}</b>.</p>
         <p class="auth-confirm-sub">Click the verification link inside the email to activate your account, then come back here to sign in.</p>
-        <button class="btn press" data-act="auth-tab" data-mode="signin" style="margin-top:16px;">
+        <button class="btn auth-submit-btn press" data-act="auth-tab" data-mode="signin" style="margin-top:16px;">
           ${ic("check", 18)} Go to Sign In
         </button>
       </div>`;
@@ -526,7 +519,7 @@ export function authModalHtml() {
         </div>
 
         <div class="auth-actions">
-          <button type="button" class="btn press ${AUTH_MODAL.loading ? "loading" : ""}" data-act="auth-forgot">
+          <button type="button" class="btn auth-submit-btn press ${AUTH_MODAL.loading ? "loading" : ""}" data-act="auth-forgot">
             ${AUTH_MODAL.loading ? `<span class="auth-spinner"></span> Sending link...` : `${ic("spark", 18)} Send Reset Link`}
           </button>
           <button type="button" class="btn sec press" data-act="auth-tab" data-mode="signin">Back to Sign In</button>
@@ -543,7 +536,10 @@ export function authModalHtml() {
     }
 
     body = `
-      <div class="auth-desc">Configure your Supabase Project URL and Anon API key to enable cloud database and realtime sync.</div>
+      <div style="margin-bottom:12px;">
+        <button type="button" class="auth-link-btn" data-act="auth-tab" data-mode="${S.user ? "account" : "signin"}">← Back</button>
+      </div>
+      <div class="auth-desc">Advanced Developer Configuration: Project URL and Anon API key.</div>
       ${alertBox}
       ${testBox}
       <form class="auth-form" onsubmit="event.preventDefault();">
@@ -603,25 +599,21 @@ export function authModalHtml() {
             <span>Cloud Items</span>
             <span class="num">${(S.items || []).length} items, ${(S.pages || []).length} pages</span>
           </div>
-          <div class="auth-meta-row">
-            <span>Supabase Host</span>
-            <span class="num" style="max-width:55%;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">${esc(cfg.url || "default")}</span>
-          </div>
         </div>
       </div>
 
       ${alertBox}
 
-      <div class="auth-actions-group" style="margin-top:14px;">
-        <button type="button" class="btn press ${AUTH_MODAL.syncLoading ? "loading" : ""}" data-act="auth-syncnow" style="margin-bottom:10px;">
+      <div class="auth-actions-group" style="margin-top:16px;">
+        <button type="button" class="btn auth-submit-btn press ${AUTH_MODAL.syncLoading ? "loading" : ""}" data-act="auth-syncnow" style="width:100%;margin-bottom:12px;">
           ${AUTH_MODAL.syncLoading ? `<span class="auth-spinner"></span> Syncing...` : `${ic("spark", 18)} Sync Now`}
         </button>
         <div style="display:flex;gap:10px;">
-          <button type="button" class="btn sec press" data-act="auth-tab" data-mode="config" style="flex:1">
-            ${ic("settings", 16)} Edit Keys
-          </button>
-          <button type="button" class="btn dng press" data-act="auth-signout" style="flex:1">
+          <button type="button" class="btn sec press" data-act="auth-signout" style="flex:1">
             ${ic("x", 16)} Sign Out
+          </button>
+          <button type="button" class="btn dng press" data-act="auth-deleteaccount" style="flex:1;border-color:color-mix(in srgb, var(--hi) 40%, transparent);">
+            ${ic("trash", 16)} Delete Account
           </button>
         </div>
       </div>`;

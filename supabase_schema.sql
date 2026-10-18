@@ -27,3 +27,18 @@ create policy "Users can insert own data"
 create policy "Users can update own data"
   on public.user_data for update
   using (auth.uid() = user_id);
+
+create policy "Users can delete own data"
+  on public.user_data for delete
+  using (auth.uid() = user_id);
+
+-- 4. (Optional) Function to allow a user to delete their own account completely
+create or replace function public.delete_user_account()
+returns void
+language plpgsql
+security definer
+as $$
+begin
+  delete from auth.users where id = auth.uid();
+end;
+$$;

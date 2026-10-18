@@ -4,7 +4,7 @@ import {
   subscribeToStateChanges,
   onAuthStateChange,
 } from "./supabase.js";
-import { S, loadPrefs, savePrefs, applyPrefs, loadState, saveState, updateSyncStatus, setStateRefreshFn, DATA_KEY, buzz } from "./state/state.js";
+import { S, loadPrefs, savePrefs, applyPrefs, loadState, saveState, updateSyncStatus, updateDeskBadges, setStateRefreshFn, DATA_KEY, buzz } from "./state/state.js";
 import { setAlarmCallbacks, checkAlarms } from "./utils/audio.js";
 import { seedAll } from "./data/seed.js";
 import { ic } from "./utils/icons.js";

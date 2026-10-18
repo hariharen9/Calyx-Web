@@ -509,6 +509,9 @@
   }
 
   /* Desktop Calendar Layout */
+  .mobile-cal-head {
+    display: none !important;
+  }
   .desk-cal-split {
     display: grid;
     grid-template-columns: 1.6fr 1fr;
@@ -537,6 +540,11 @@
 
   /* Desktop Tasks Layout */
   .mobile-tasks-head {
+    display: none !important;
+  }
+
+  /* Desktop Track Layout */
+  .mobile-track-head {
     display: none !important;
   }
   .desk-tasks-bar {

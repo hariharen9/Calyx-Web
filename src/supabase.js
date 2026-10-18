@@ -486,3 +486,69 @@ export function subscribeToStateChanges(onUpdate) {
     }
   };
 }
+
+/**
+ * Deletes the user's data record from public.user_data table in Supabase.
+ */
+export async function deleteUserDataFromCloud() {
+  const sb = getSupabase();
+  if (!sb) return { success: false, error: 'Unconfigured' };
+  const user = await getCurrentUser();
+  if (!user) return { success: false, error: 'Unauthenticated' };
+
+  try {
+    const { error } = await sb
+      .from('user_data')
+      .delete()
+      .eq('user_id', user.id);
+
+    if (error) {
+      // If delete RLS is blocked, wipe data arrays by updating to empty
+      await sb
+        .from('user_data')
+        .update({
+          items: [],
+          logs: [],
+          cds: [],
+          pages: [],
+          folders: [],
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id);
+    }
+    return { success: true };
+  } catch (err) {
+    console.error('Error deleting cloud data:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Permanently deletes the user's cloud data and signs out.
+ * If delete_user_account RPC function is installed, also removes user from auth.users.
+ */
+export async function deleteAccount() {
+  const sb = getSupabase();
+  if (!sb) return { success: false, error: 'Unconfigured' };
+  const user = await getCurrentUser();
+  if (!user) return { success: false, error: 'Unauthenticated' };
+
+  try {
+    // 1. Delete or wipe user_data in public schema
+    await deleteUserDataFromCloud();
+
+    // 2. Attempt self-delete RPC if configured in Supabase SQL editor
+    try {
+      await sb.rpc('delete_user_account');
+    } catch (e) {
+      // RPC may not be installed; cloud data is wiped
+    }
+
+    // 3. Terminate local session
+    await sb.auth.signOut();
+    return { success: true };
+  } catch (err) {
+    console.error('Error deleting account:', err);
+    return { success: false, error: err.message };
+  }
+}

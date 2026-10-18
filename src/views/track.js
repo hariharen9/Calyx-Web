@@ -5,15 +5,25 @@ import { ic } from "../utils/icons.js";
 
 /* ================= TRACK ================= */
 export function vTrack() {
-  let h = `<header class="top ${stg(0)}"><div><div class="sub">Time since and time until</div><h1 class="disp h1">Track</h1></div><button class="addbtn press" data-act="${S.trackTab === "since" ? "newlog" : "newcd"}">${ic("plus", 16)}${S.trackTab === "since" ? "New log" : "New countdown"}</button></header>`;
-  h += `<div class="${stg(1)}">${segHtml(
-    "trackTab",
-    [
-      ["since", "Days since", S.logs.length],
-      ["until", "Days until", S.cds.length],
-    ],
-    S.trackTab,
-  )}</div>`;
+  let h = `<div class="mobile-track-head">
+    <header class="top ${stg(0)}">
+      <div>
+        <div class="sub">Time since and time until</div>
+        <h1 class="disp h1">Track</h1>
+      </div>
+      <button class="addbtn press" data-act="${S.trackTab === "since" ? "newlog" : "newcd"}">${ic("plus", 16)}${S.trackTab === "since" ? "New log" : "New countdown"}</button>
+    </header>
+    <div class="${stg(1)}" style="margin-bottom: 14px;">
+      ${segHtml(
+        "trackTab",
+        [
+          ["since", "Days since", S.logs.length],
+          ["until", "Days until", S.cds.length],
+        ],
+        S.trackTab,
+      )}
+    </div>
+  </div>`;
   return h + (S.trackTab === "since" ? vSince() : vUntil());
 }
 

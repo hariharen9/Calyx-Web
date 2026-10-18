@@ -215,8 +215,78 @@
 .auth-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 18px;
+  gap: 12px;
+  margin-top: 22px;
+  width: 100%;
+}
+
+/* Primary Action Button (Sign In / Create Account) */
+.auth-submit-btn,
+.auth-actions .btn,
+[data-theme="calm"] .auth-submit-btn,
+[data-theme="calm"] .auth-actions .btn {
+  flex: none !important;
+  width: 100% !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  padding: 0 24px !important;
+  border-radius: var(--r-md, 14px) !important;
+  background: var(--accent) !important;
+  color: var(--on-accent, #ffffff) !important;
+  font-family: var(--font-body);
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  border: var(--bw, 1px) solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 14px -2px rgba(46, 111, 104, 0.38), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease), box-shadow 0.2s, background-color 0.2s, filter 0.15s;
+}
+
+[data-mode="dark"] .auth-submit-btn,
+[data-mode="dark"] .auth-actions .btn,
+[data-mode="dark"][data-theme="calm"] .auth-submit-btn,
+[data-mode="dark"][data-theme="calm"] .auth-actions .btn {
+  background: #3fa185 !important;
+  color: #0c1815 !important;
+  font-weight: 800 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.45), 0 0 12px rgba(70, 165, 138, 0.25) !important;
+}
+
+.auth-submit-btn:hover,
+.auth-actions .btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px -2px rgba(46, 111, 104, 0.48) !important;
+}
+
+[data-mode="dark"] .auth-submit-btn:hover,
+[data-mode="dark"] .auth-actions .btn:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.55), 0 0 16px rgba(70, 165, 138, 0.35) !important;
+}
+
+.auth-submit-btn:active,
+.auth-actions .btn:active {
+  transform: translateY(1px) scale(0.99);
+  filter: brightness(0.98);
+}
+
+.auth-actions .btn.sec {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: var(--bw, 1px) solid var(--line) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.auth-actions .btn.sec:hover {
+  background: var(--surface2) !important;
+  box-shadow: var(--shadow) !important;
 }
 
 .auth-actions-group {

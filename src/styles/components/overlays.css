@@ -238,8 +238,16 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  line-height: 1;
   border: var(--bw) solid var(--line);
   box-shadow: var(--shadow);
+}
+.btn svg,
+.btn .ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 [data-theme="calm"] .btn {
   border-radius: 18px;
@@ -434,8 +442,15 @@
   height: 48px;
   border-radius: var(--r-md);
   font-size: 24px;
+  line-height: 1;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   background: var(--surface);
   border: var(--bw) solid var(--line);
+  cursor: pointer;
   transition:
     transform 0.3s var(--spring),
     background-color 0.2s;
@@ -455,22 +470,31 @@
 }
 .kdots {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 4px;
 }
 .kdots button {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
   border-radius: var(--r-pill);
   background: var(--c);
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  padding: 0;
   transition:
-    transform 0.35s var(--spring),
-    box-shadow 0.2s;
+    transform 0.25s var(--spring),
+    box-shadow 0.2s var(--ease);
+}
+.kdots button:hover:not(.on) {
+  transform: scale(1.15);
 }
 .kdots button.on {
-  transform: scale(1.2);
+  transform: scale(1.1);
   box-shadow:
-    0 0 0 3px var(--bg),
-    0 0 0 5px var(--c);
+    0 0 0 2.5px var(--surface),
+    0 0 0 4.5px var(--c);
 }
 .picks {
   display: flex;

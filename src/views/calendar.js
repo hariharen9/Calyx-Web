@@ -32,16 +32,29 @@ export function dayList(k) {
 }
 
 export function vCal() {
-  let h = `<header class="top ${stg(0)}"><div><div class="sub">${MONTHS[pd(S.sel).getMonth()]} ${pd(S.sel).getFullYear()}</div><h1 class="disp h1">Calendar</h1></div><div class="top-actions"><button class="pillbtn press" data-act="todayjump">Today</button><button class="ibtn press" data-act="cmd" aria-label="Search">${ic("search")}</button></div></header>`;
-  h += `<div class="${stg(1)}">${segHtml(
-    "calView",
-    [
-      ["month", "Month"],
-      ["week", "Week"],
-      ["agenda", "Agenda"],
-    ],
-    S.calView,
-  )}</div>`;
+  let h = `<div class="mobile-cal-head">
+    <header class="top ${stg(0)}">
+      <div>
+        <div class="sub">${MONTHS[pd(S.sel).getMonth()]} ${pd(S.sel).getFullYear()}</div>
+        <h1 class="disp h1">Calendar</h1>
+      </div>
+      <div class="top-actions">
+        <button class="pillbtn press" data-act="todayjump">Today</button>
+        <button class="ibtn press" data-act="cmd" aria-label="Search">${ic("search")}</button>
+      </div>
+    </header>
+    <div class="${stg(1)}" style="margin-bottom: 14px;">
+      ${segHtml(
+        "calView",
+        [
+          ["month", "Month"],
+          ["week", "Week"],
+          ["agenda", "Agenda"],
+        ],
+        S.calView,
+      )}
+    </div>
+  </div>`;
   h +=
     S.calView === "month"
       ? vMonth()

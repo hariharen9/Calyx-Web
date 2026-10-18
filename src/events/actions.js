@@ -1,5 +1,5 @@
 import { S, saveState, savePrefs, applyPrefs, getResolvedMode, reduced, buzz, exportJsonBackup, triggerImportJson, exportIcsCalendar, triggerImportIcs } from "../state/state.js";
-import { signInWithEmail, signUpWithEmail, signOutUser, pushStateToCloud, pullStateFromCloud, saveSupabaseConfig } from "../supabase.js";
+import { signInWithEmail, signUpWithEmail, signOutUser, pushStateToCloud, pullStateFromCloud, saveSupabaseConfig, deleteAccount } from "../supabase.js";
 import { $, $$, esc, todayKey, pd, ymd, addKey, uid } from "../utils/helpers.js";
 import { ic } from "../utils/icons.js";
 import { toast, getToastUndo, clearToastUndo } from "../utils/toast.js";
@@ -570,6 +570,33 @@ export const ACT = {
   },
   "auth-togglepass"() {
     togglePasswordVisibility();
+  },
+  async deleteaccount() {
+    if (!confirm("Are you sure you want to permanently delete your account and all data? This will wipe all items locally and in the cloud.")) {
+      return;
+    }
+    toast("Deleting account and wiping data...");
+    // 1. Wipe local data
+    S.items = [];
+    S.logs = [];
+    S.cds = [];
+    S.pages = [];
+    S.folders = [];
+    saveState();
+
+    // 2. Delete cloud data & account
+    if (S.user) {
+      await deleteAccount();
+      S.user = null;
+    }
+
+    refreshAll();
+    paintPage();
+    closeSheet();
+    toast("Account and data completely deleted");
+  },
+  "auth-deleteaccount"() {
+    this.deleteaccount();
   },
   editsbcfg() {
     openAuthModal("config");

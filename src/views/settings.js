@@ -161,6 +161,11 @@ export function settingsHtml() {
       <div><b style="color:var(--hi)">Clear all data</b><small>Removes all items, logs, and notes (local & cloud)</small></div>
       <button class="addbtn press" style="color:var(--hi)" data-act="clear">Clear All</button>
     </div>
+    ${S.user ? `
+    <div class="srow">
+      <div><b style="color:var(--hi)">Delete account</b><small>Permanently deletes account & wipes all data</small></div>
+      <button class="addbtn press" style="color:var(--hi)" data-act="deleteaccount">Delete Account</button>
+    </div>` : ""}
   </section>`;
   h += `<div class="about"><b class="disp">Calyx</b>Version 1.0 · Local-first<br>Zero telemetry. Offline ready.<br><button class="addbtn press" style="margin-top:12px" data-act="welcome">Replay welcome</button></div></div>`;
   return h;
