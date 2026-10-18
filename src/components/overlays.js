@@ -3,7 +3,7 @@ import { getSupabase, getSupabaseConfig } from "../supabase.js";
 import { $, $$, esc, todayKey, nowMin, diffD, clamp, pad, MIN, addKey } from "../utils/helpers.js";
 import { ic, TYPELABEL } from "../utils/icons.js";
 import { toast } from "../utils/toast.js";
-import { logStats, cdParts, longDate, fmtT, dur, col, CHK, endOf, dayLabel } from "../queries/queries.js";
+import { logStats, cdParts, longDate, fmtT, dur, col, CHK, endOf, dayLabel, segHtml } from "../queries/queries.js";
 import { repLabel } from "../data/seed.js";
 import { fld } from "./composer.js";
 import { vHome } from "../views/home.js";
@@ -234,7 +234,33 @@ export function showWelcome() {
   const el = document.createElement("div");
   el.className = "welcome";
   el.id = "welcome";
-  el.innerHTML = `<div class="logo">${ic("hourglass", 28)}</div><h1 class="disp">Every date.<br>Every deadline.</h1><p>Events, tasks, countdowns, logs and pages in one fast place. Everything stays on your phone.</p><div class="lab">Pick a look. You can change it any time.</div><div class="tcards" style="margin:0 -22px;padding:4px 22px 14px">${THEMES.map(([id, n]) => `<button class="tcard ${S.prefs.theme === id ? "sel" : ""}" data-theme="${id}" data-act="theme" data-t="${id}"><div class="mh"></div><div class="ml"></div><div class="ml s"></div><div class="mn disp">14</div><div class="nm">${n}</div></button>`).join("")}</div><button class="btn press" data-act="welcomego">Get started</button>`;
+  el.innerHTML = `
+    <div class="logo">${ic("hourglass", 28)}</div>
+    <h1 class="disp">Every date.<br>Every deadline.</h1>
+    <p>Events, tasks, countdowns, logs and pages in one fast place. Everything stays on your phone.</p>
+    <div class="welcome-custom">
+      <div class="welcome-sec">
+        <div class="lab">Appearance mode</div>
+        ${segHtml(
+          "mode",
+          [
+            ["light", "Light"],
+            ["dark", "Dark"],
+            ["system", "System"],
+          ],
+          S.prefs.mode || "system",
+          "sm",
+        )}
+      </div>
+      <div class="welcome-sec">
+        <div class="lab">Theme design</div>
+        <div class="tcards" style="margin:0 -22px;padding:4px 22px 14px">
+          ${THEMES.map(([id, n]) => `<button class="tcard ${S.prefs.theme === id ? "sel" : ""}" data-theme="${id}" data-act="theme" data-t="${id}"><div class="mh"></div><div class="ml"></div><div class="ml s"></div><div class="mn disp">14</div><div class="nm">${n}</div></button>`).join("")}
+        </div>
+      </div>
+    </div>
+    <button class="btn press" data-act="welcomego">Get started</button>
+  `;
   $("#app").appendChild(el);
 }
 

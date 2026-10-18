@@ -233,7 +233,9 @@
   background: var(--bg);
   display: flex;
   flex-direction: column;
-  padding: 34px 22px 22px;
+  padding: 34px 22px calc(24px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overflow-x: hidden;
   transition:
     opacity 0.5s,
     transform 0.6s var(--ease);
@@ -244,43 +246,44 @@
   pointer-events: none;
 }
 .welcome h1 {
-  font-size: 50px;
-  margin: 18px 0 12px;
+  font-size: 46px;
+  margin: 16px 0 10px;
 }
 [data-theme="editorial"] .welcome h1 {
-  font-size: 60px;
+  font-size: 54px;
 }
 .welcome p {
-  font-size: 16px;
+  font-size: 15.5px;
   color: var(--muted);
   font-weight: 500;
-  line-height: 1.5;
-  max-width: 30ch;
+  line-height: 1.45;
+  max-width: 32ch;
+  margin-bottom: 20px;
 }
-.welcome .tcards {
+.welcome .welcome-custom {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.welcome .welcome-sec {
+  display: flex;
+  flex-direction: column;
 }
 .welcome .lab {
   font-size: 13px;
   font-weight: 700;
   color: var(--muted);
-  margin-top: auto;
   margin-bottom: 8px;
 }
 .welcome .tcards {
   margin-top: 0;
   scroll-padding-inline: 22px;
 }
-.welcome .lab {
-  margin-top: auto;
-  margin-bottom: 10px;
-}
 .welcome .btn {
   flex: none;
-  margin-top: 8px;
-}
-.welcome p {
-  margin-bottom: 24px;
+  min-height: 52px;
+  margin-top: 14px;
 }
 .logo {
   width: 56px;
